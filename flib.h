@@ -183,19 +183,19 @@ float Q_rsqrt(float number)
 
 v2 v2add(v2 x1, v2 x2)
 {
-    v2 r = {x1.f[0]+x2.f[0], x1.f[1]+x2.f[1]};
+    v2 r = {{x1.f[0]+x2.f[0], x1.f[1]+x2.f[1]}};
     return r;
 }
 
 v2 v2sub(v2 x1, v2 x2)
 {
-    v2 r = {x1.f[0]-x2.f[0], x1.f[1]-x2.f[1]};
+    v2 r = {{x1.f[0]-x2.f[0],x1.f[1]-x2.f[1]}};
     return r;
 }
 
 v2 v2skl(v2 x, float n)
 {
-    v2 r = {x.f[0]*n, x.f[1]*n};
+    v2 r = {{x.f[0]*n, x.f[1]*n}};
     return r;
 }
 
@@ -211,7 +211,7 @@ v2 v2norm(v2 x)
     v2 r = x;
     if (len2 > 0) {
         len2 = Q_rsqrt(len2);
-        r = (v2){x.f[0]*len2, x.f[1]*len2};
+        r = (v2){{x.f[0]*len2, x.f[1]*len2}};
     }
     return r;
 }
