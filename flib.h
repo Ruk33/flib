@@ -374,14 +374,15 @@ usize strf(char *dest, usize n, char *format, ...)
     va_list va;
     va_start(va, format);
     while (*format && dest - head < n) {
-        if (*format + *(format+1) == '%' + '%') {
+        int iscommand = *format == '%';
+        if (iscommand && *(format+1) == '%') {
             // skip %%.
             format++;
             format++;
             *dest++ = '%';
             continue;
         }
-        if (*format + *(format+1) == '%' + 'c') {
+        if (iscommand && *(format+1) == 'c') {
             // skip %c.
             format++;
             format++;
@@ -389,7 +390,7 @@ usize strf(char *dest, usize n, char *format, ...)
             *dest++ = c;
             continue;
         }
-        if (*format + *(format+1) == '%' + 's') {
+        if (iscommand && *(format+1) == 's') {
             // skip %s.
             format++;
             format++;
@@ -404,7 +405,7 @@ usize strf(char *dest, usize n, char *format, ...)
             }
             continue;
         }
-        if (*format + *(format+1) + *(format+2) == '%' + '*' + 's') {
+        if (iscommand && *(format+1) == '*' && *(format+2) == 's') {
             // skip %*s.
             format++;
             format++;
@@ -422,7 +423,7 @@ usize strf(char *dest, usize n, char *format, ...)
             }
             continue;
         }
-        if (*format + *(format+1) == '%' + 'x') {
+        if (iscommand && *(format+1) == 'x') {
             // skip %x.
             format++;
             format++;
@@ -434,7 +435,7 @@ usize strf(char *dest, usize n, char *format, ...)
                 dest+=r;
             continue;
         }
-        if (*format + *(format+1) == '%' + 'd') {
+        if (iscommand && *(format+1) == 'd') {
             // skip %d.
             format++;
             format++;
@@ -446,7 +447,7 @@ usize strf(char *dest, usize n, char *format, ...)
                 dest+=r;
             continue;
         }
-        if (*format + *(format+1) == '%' + 'f') {
+        if (iscommand && *(format+1) == 'f') {
             // skip %f.
             format++;
             format++;
@@ -458,7 +459,7 @@ usize strf(char *dest, usize n, char *format, ...)
                 dest+=r;
             continue;
         }
-        if (*format + *(format+1) == '%' + 'v') {
+        if (iscommand && *(format+1) == 'v') {
             // skip %v.
             format++;
             format++;
