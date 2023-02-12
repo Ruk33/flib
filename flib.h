@@ -60,11 +60,7 @@ typedef u64 usize;
 #define syield(id, _timeout, dt)        \
     do {                                \
         (__coro)->timeout = (_timeout); \
-        do {                            \
-            (__coro)->state = (id);     \
-            return;                     \
-            case (id):;                 \
-        } while (0);                    \
+        yield(id);                      \
         (__coro)->timeout -= (dt);      \
         if ((__coro)->timeout > 0)      \
             return;                     \
@@ -79,7 +75,7 @@ typedef u64 usize;
         }       \
     } while (0)
 
-// str format with array destination.
+// str format using fixed array as destination.
 #define strf2(dest, format, ...) \
     (strf((dest), sizeof(dest), format, __VA_ARGS__))
 
@@ -102,13 +98,13 @@ float Q_rsqrt(float number);
 v2 v2add(v2 x1, v2 x2);
 // subtract x1 and x2.
 v2 v2sub(v2 x1, v2 x2);
-// multiply/scale.
+// multiply/scale vector x by n.
 v2 v2skl(v2 x, float n);
 // get normalized/direction from src to dest.
 v2 v2dir2(v2 src, v2 dest);
-// normalize.
+// normalize vector x.
 v2 v2norm(v2 x);
-// dot product.
+// dot product between x1 and x2.
 float v2dot(v2 x1, v2 x2);
 // get squared length of x.
 float v2len2(v2 x);
@@ -141,13 +137,16 @@ int streqn(char *a, char *b, usize n);
 usize strlen2(char *src);
 // convert integer to string.
 // dest can be null.
+// dest will be null terminated.
 // the amount of characters written is returned.
 usize stri64(char *dest, i64 x, usize n);
 // convert double to string.
 // dest can be null.
+// dest will be null terminated.
 // the amount of characters written is returned.
 usize strdbl(char *dest, double x, usize n);
 // write up to n bytes of formatted string into dest.
+// dest will be null terminated.
 // formats:
 // %s  = writes strings up to null terminator.
 // %*s = writes n bytes of string. 
