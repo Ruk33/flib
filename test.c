@@ -74,5 +74,17 @@ int main(void)
     testcoroutine(&coro);
 
     printf("all good!\n");
+
+    char buf[256] = {0};
+    usize written = strf2(
+        buf, 
+        "test %s %d %f %v!\n", 
+        "dynamic", 
+        123456, 
+        -12345.215,
+        (v2){26.31, 451245.12}
+    );
+    printf("%d %s", written, buf);
+
     return 0;
 }

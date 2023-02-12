@@ -1,20 +1,22 @@
 #ifndef flibh
 #define flibh
 
-typedef unsigned char byte;
+#include <stdarg.h>
 
 typedef unsigned char       u8;
 typedef unsigned short     u16;
 typedef unsigned int       u32;
-typedef unsigned long long u64;
+typedef unsigned int long  u64;
 
 typedef signed char       i8;
 typedef signed short     i16;
 typedef signed int       i32;
-typedef signed long long i64;
+typedef signed int long  i64;
 
-typedef signed long long   ssize;
-typedef unsigned long long usize;
+typedef u8 byte;
+
+typedef i64 ssize;
+typedef u64 usize;
 
 #define arrlen(x) \
     (sizeof(x)/sizeof(*(x)))
@@ -77,6 +79,10 @@ typedef unsigned long long usize;
         }       \
     } while (0)
 
+// str format with array destination.
+#define strf2(dest, format, ...) \
+    (strf((dest), sizeof(dest), format, __VA_ARGS__))
+
 typedef union v2 {
     struct { float x, y; };
     struct { float w, h; };
@@ -133,6 +139,24 @@ int streqn(char *a, char *b, usize n);
 // src must be null terminated.
 // src can be null.
 usize strlen2(char *src);
+// convert integer to string.
+// dest can be null.
+// the amount of characters written is returned.
+usize stri64(char *dest, i64 x, usize n);
+// convert double to string.
+// dest can be null.
+// the amount of characters written is returned.
+usize strdbl(char *dest, double x, usize n);
+// write up to n bytes of formatted string into dest.
+// formats:
+// %s  = writes strings up to null terminator.
+// %*s = writes n bytes of string. 
+//       example: strf(dest, n, "%*s", 2, "lorem")
+//       only writes 2 bytes/chars, meaning, "lo"
+// %d  = writes int.
+// %f  = writes float/double with 2 decimals.
+// %v  = writes vector with format "(x:y)"
+usize strf(char *dest, usize n, char *format, ...);
 
 // random integer.
 // seed can be null.
@@ -278,13 +302,184 @@ usize strlen2(char *src)
     return r;
 }
 
+usize stri64(char *dest, i64 x, usize n)
+{
+    if (!dest || !n)
+        return 0;
+    int negative = x < 0;
+    usize r = 0;
+    // count digits in number.
+    for (i64 i = x; i; i /= 10)
+        r++;
+    // if we can't store the whole number
+    // just return.
+    if (r + negative >= n)
+        return 0;
+    // add negative symbol.
+    if (negative)
+        *dest++ = '-';
+    x = abs(x);
+    for (usize i = 0; i < r; i++) {
+        i64 rem = x % 10;
+        x = x / 10;
+        *(dest + r - i - 1) = rem + '0';
+    }
+    // null terminator.
+    *(dest + negative + r) = 0;
+    return r + negative;
+}
+
+usize strdbl(char *dest, double x, usize n)
+{
+    if (!dest || !n)
+        return 0;
+    int negative = x < 0;
+    usize r = 0;
+    x += 0.005;
+    x = abs(x);
+    i64 d = (i64)x;
+    i64 dec = (i64)(x * 100) % 100;
+    if (negative)
+        *dest++ = '-';
+    while (r + negative < n && d > 0) {
+        *dest++ = (d % 10) + '0';
+        r++;
+        d /= 10;
+    }
+    if (r + 3 + negative >= n) {
+        // if there isn't enough space, roll back what we wrote.
+        for (usize i = 0; i < r + negative; i++)
+            *dest-- = 0;
+        return 0;
+    }
+    for (usize i = 0, m = r/2; i < m; i++) {
+        char last = *(dest - r + i);
+        *(dest - r + i) = *(dest - (i + 1));
+        *(dest - (i + 1)) = last;
+    }
+    *dest++ = '.';
+    *dest++ = (dec / 10) + '0';
+    *dest++ = (dec % 10) + '0';
+    // null terminator.
+    *dest = 0;
+    return r + 3 + negative;
+}
+
+usize strf(char *dest, usize n, char *format, ...)
+{
+    if (!dest || !format)
+        return 0;
+    char *head = dest;
+    va_list va;
+    va_start(va, format);
+    while (*format && dest - head < n) {
+        if (*format + *(format+1) == '%' + 's') {
+            // skip %s.
+            format++;
+            format++;
+            char *buf = va_arg(va, char *);
+            if (!buf)
+                buf = "(null)";
+            usize len = strlen2(buf);
+            for (usize i = 0; i < len; i++) {
+                *dest++ = *buf++;
+                if (dest - head >= n)
+                    goto finish;
+            }
+            continue;
+        }
+        if (*format + *(format+1) + *(format+2) == '%' + '*' + 's') {
+            // skip %*s.
+            format++;
+            format++;
+            format++;
+            usize len = va_arg(va, usize);
+            char *buf = va_arg(va, char *);
+            if (!buf) {
+                len = 6;
+                buf = "(null)";
+            }
+            for (usize i = 0; i < len; i++) {
+                *dest++ = *buf++;
+                if (dest - head >= n)
+                    goto finish;
+            }
+            continue;
+        }
+        if (*format + *(format+1) == '%' + 'd') {
+            // skip %d.
+            format++;
+            format++;
+            i64 d = va_arg(va, i64);
+            usize r = stri64(dest, d, n - (dest - head));
+            if (!r)
+                *dest++ = '?';
+            else
+                dest+=r;
+            continue;
+        }
+        if (*format + *(format+1) == '%' + 'f') {
+            // skip %f.
+            format++;
+            format++;
+            double f = va_arg(va, double);
+            usize r = strdbl(dest, f, n - (dest - head));
+            if (!r)
+                *dest++ = '?';
+            else
+                dest+=r;
+            continue;
+        }
+        if (*format + *(format+1) == '%' + 'v') {
+            // skip %v.
+            format++;
+            format++;
+            *dest++ = '(';
+            if (dest - head >= n)
+                goto finish;
+            v2 v = va_arg(va, v2);
+            double dble = (double)v.f[0];
+            usize d = strdbl(dest, dble, n - (dest - head));
+            if (!d)
+                *dest++ = '?';
+            else
+                dest+=d;
+            if (dest - head >= n)
+                goto finish;
+            *dest++ = ':';
+            if (dest - head >= n)
+                goto finish;
+            dble = (double)v.f[1];
+            d = strdbl(dest, dble, n - (dest - head));
+            if (!d)
+                *dest++ = '?';
+            else
+                dest+=d;
+            if (dest - head >= n)
+                goto finish;
+            *dest++ = ')';
+            continue;
+        }
+        *dest++ = *format++;
+    }
+finish:
+    va_end(va);
+    // null terminator.
+    *dest = 0;
+    usize r = dest - head;
+    // don't count null terminator.
+    if (r)
+        r--;
+    return r;
+}
+
 u32 randi(u32 *seed)
 {
     static u32 debugseed = 0;
     if (!seed)
         seed = &debugseed;
-    *seed = (214013*(*seed)+2531011);
-    u32 r = (*seed>>16)&0x7FFF;
+    *seed = (214013 * (*seed) + 2531011);
+    u32 r = (*seed >> 16) & 0x7FFF;
     return r;
 }
 
