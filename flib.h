@@ -21,16 +21,16 @@ typedef u64 usize;
 #define arrlen(x) \
     (sizeof(x)/sizeof(*(x)))
 // traverse elements in array.
-#define foreach(type, x, arr) \
+#define each(type, x, arr) \
     for (type *x = (arr); x < (arr) + arrlen(arr); x++)
 // traverse up to n elements in array.
-#define foreachn(type, x, arr, n) \
+#define eachn(type, x, arr, n) \
     for (type *x = (arr); x < (arr) + min(arrlen(arr), (n)); x++)
-// traverse elements in array starting from the end.
-#define foreachrev(type, x, arr) \
+// traverse elements in array starting from the end (reverse)
+#define eachr(type, x, arr) \
     for (type *x = (arr) + arrlen(arr) - 1; x >= (arr); x--)
-// traverse back n elements in array.
-#define foreachrevn(type, x, arr, n) \
+// traverse n elements in array starting from the end (reverse)
+#define eachrn(type, x, arr, n) \
     for (type *x = (arr) + arrlen(arr) - 1; x >= (arr) + arrlen(arr) - (n); x--)
 
 #define abs(x) \
@@ -106,6 +106,17 @@ typedef u64 usize;
 #define strf2(dest, format, ...) \
     (strf((dest), sizeof(dest), format, __VA_ARGS__))
 
+// longer aliases.
+#define foreach each
+#define foreachn eachn
+#define foreachrev eachr
+#define foreachrevn eachrn
+#define strmatches streq
+#define strmatchesn streqn
+#define strlen2 strl
+#define strstartswith strsw
+#define strendswith strew
+
 typedef union v2 {
     struct { float x, y; };
     struct { float w, h; };
@@ -138,18 +149,18 @@ float v2len2(v2 x);
 // get squared distance from src to dest.
 float v2dist2(v2 src, v2 dest);
 // check if target is inside the range at src.
-int v2inrange(v2 target, v2 src, float r);
+int v2inrng(v2 target, v2 src, float r);
 // check if target is inside a rect starting at src.
 int v2inrect(v2 target, v2 src, float w, float h);
 
 // check if string src starts with match.
 // both strings need to be null terminated.
 // src and match can be null.
-int strstartswith(char *src, char *match);
+int strsw(char *src, char *match);
 // check if string src ends with match.
 // both strings need to be null terminated.
 // src and match can be null.
-int strendswith(char *src, char *match);
+int strew(char *src, char *match);
 // check if string a and b are equal.
 // both strings need to be null terminated.
 // a and b can be null.
@@ -161,7 +172,7 @@ int streqn(char *a, char *b, usize n);
 // get length of src.
 // src must be null terminated.
 // src can be null.
-usize strlen2(char *src);
+usize strl(char *src);
 // convert integer to string.
 // dest can be null.
 // dest will be null terminated.
@@ -185,6 +196,9 @@ usize strdbl(char *dest, double x, usize n);
 // %f  = writes float/double with 2 decimals.
 // %v  = writes vector with format "(x:y)"
 usize strf(char *dest, usize n, char *format, ...);
+
+// memset, set n bytes from dest.
+void mems(void *dest, byte src, usize n);
 
 // random integer.
 // seed can be null.
@@ -261,7 +275,7 @@ float v2dist2(v2 src, v2 dest)
     return r;
 }
 
-int v2inrange(v2 target, v2 src, float range)
+int v2inrng(v2 target, v2 src, float range)
 {
     int r = v2dist2(src, target) <= sqr(range);
     return r;
@@ -278,7 +292,7 @@ int v2inrect(v2 target, v2 src, float w, float h)
     return r;
 }
 
-int strstartswith(char *src, char *match)
+int strsw(char *src, char *match)
 {
     if (!src || !match)
         return 0;
@@ -287,7 +301,7 @@ int strstartswith(char *src, char *match)
     return r;
 }
 
-int strendswith(char *src, char *match)
+int strew(char *src, char *match)
 {
     if (!src || !match)
         return 0;
@@ -321,7 +335,7 @@ int streqn(char *a, char *b, usize n)
     return r;
 }
 
-usize strlen2(char *src)
+usize strl(char *src)
 {
     if (!src)
         return 0;
@@ -527,6 +541,15 @@ finish:
     if (r)
         r--;
     return r;
+}
+
+void mems(void *dest, byte src, usize n)
+{
+    if (!dest)
+        return;
+    byte *bdest = (byte *)dest;
+    for (usize i = 0; i < n; i++)
+        *bdest++ = src;
 }
 
 u32 randi(u32 *seed)
