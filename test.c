@@ -78,7 +78,8 @@ int main(void)
     char buf[256] = {0};
     usize written = strf2(
         buf, 
-        "test %s %d %f %v!\n", 
+        "test %c %%s %s %d %f %v!\n", 
+        'a',
         "dynamic", 
         123456, 
         -12345.215,

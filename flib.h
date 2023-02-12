@@ -148,6 +148,8 @@ usize strdbl(char *dest, double x, usize n);
 // write up to n bytes of formatted string into dest.
 // dest will be null terminated.
 // formats:
+// %%  = escapes % and writes %.
+// %c  = writes character.
 // %s  = writes strings up to null terminator.
 // %*s = writes n bytes of string. 
 //       example: strf(dest, n, "%*s", 2, "lorem")
@@ -372,6 +374,21 @@ usize strf(char *dest, usize n, char *format, ...)
     va_list va;
     va_start(va, format);
     while (*format && dest - head < n) {
+        if (*format + *(format+1) == '%' + '%') {
+            // skip %%.
+            format++;
+            format++;
+            *dest++ = '%';
+            continue;
+        }
+        if (*format + *(format+1) == '%' + 'c') {
+            // skip %c.
+            format++;
+            format++;
+            char c = (char)va_arg(va, int);
+            *dest++ = c;
+            continue;
+        }
         if (*format + *(format+1) == '%' + 's') {
             // skip %s.
             format++;
