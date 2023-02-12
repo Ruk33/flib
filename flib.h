@@ -192,6 +192,7 @@ usize strdbl(char *dest, double x, usize n);
 // %*s = writes n bytes of string. 
 //       example: strf(dest, n, "%*s", 2, "lorem")
 //       only writes 2 bytes/chars, meaning, "lo"
+// %x  = writes hexadecimal.
 // %d  = writes int.
 // %f  = writes float/double with 2 decimals.
 // %v  = writes vector with format "(x:y)"

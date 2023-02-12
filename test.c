@@ -61,6 +61,12 @@ int main(void)
 
     printf("random: %d\n", randi(0));
     printf("random: %d\n", randi(0));
+    printf("random: %d\n", randi(0));
+    printf("random: %d\n", randi(0));
+    printf("random: %d\n", randi(0));
+    printf("random between 5 and 10: %d\n", randi2(0, 5, 10));
+    printf("random between 5 and 10: %d\n", randi2(0, 5, 10));
+    printf("random between 5 and 10: %d\n", randi2(0, 5, 10));
     printf("random between 5 and 10: %d\n", randi2(0, 5, 10));
     printf("random between 5 and 10: %d\n", randi2(0, 5, 10));
     printf("random between 5 and 10: %d\n", randi2(0, 5, 10));
