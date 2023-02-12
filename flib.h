@@ -44,12 +44,34 @@ typedef u64 usize;
 #define sqr(x) \
     ((x)*(x))
 
+// coroutine/fiber/green-thread
+// example:
+// void mycoroutine(struct coroutine *ctx)
+// {
+//      cstart(ctx) {
+//          // on first call, this will be executed.
+//          // then exit.
+//          yield(1);
+//          // on second call, this will be executed.
+//          // then exit.
+//          yield(2)
+//          // third call, this chunk will execute, restarting
+//          // the coroutine state to start from the beginning.
+//          creset;
+//      } cend;
+// }
 #define cstart(ctx)                         \
     do {                                    \
         struct coroutine *__coro = (ctx);   \
         switch((__coro)->state) {           \
         case 0:
 
+// yield and update the state of the coroutine.
+// id must be unique.
+// id could be replaced with __LINE__ if you don't
+// hot-reload your code. if you do though, you
+// can't since any change can update your line
+// numbers and produce incorrect results.
 #define yield(id)               \
     do {                        \
         (__coro)->state = (id); \
@@ -57,6 +79,10 @@ typedef u64 usize;
         case (id):;             \
     } while (0)
 
+// sleep and yield until timeout has past.
+// dt = how much time has past (if you are writing
+//      a game, this would be the delta time of each
+//      frame)
 #define syield(id, _timeout, dt)        \
     do {                                \
         (__coro)->timeout = (_timeout); \
@@ -66,6 +92,7 @@ typedef u64 usize;
             return;                     \
     } while(0)
 
+// reset the coroutine state to start from the beginning.
 #define creset                              \
     do {                                    \
         *(__coro) = (struct coroutine){0};  \
