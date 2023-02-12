@@ -3,35 +3,35 @@
 
 #include <stdarg.h>
 
-typedef unsigned char       u8;
-typedef unsigned short     u16;
-typedef unsigned int       u32;
-typedef unsigned int long  u64;
+typedef unsigned char      u8;
+typedef unsigned short    u16;
+typedef unsigned int      u32;
+typedef unsigned int long u64;
 
-typedef signed char       i8;
-typedef signed short     i16;
-typedef signed int       i32;
-typedef signed int long  i64;
+typedef signed char      i8;
+typedef signed short    i16;
+typedef signed int      i32;
+typedef signed int long i64;
 
 typedef u8 byte;
 
 typedef i64 ssize;
 typedef u64 usize;
 
-#define arrlen(x) \
-    (sizeof(x)/sizeof(*(x)))
+#define arrl(x) \
+    (sizeof(x) / sizeof(*(x)))
 // traverse elements in array.
 #define each(type, x, arr) \
-    for (type *x = (arr); x < (arr) + arrlen(arr); x++)
+    for (type *x = (arr); x < (arr) + arrl(arr); x++)
 // traverse up to n elements in array.
 #define eachn(type, x, arr, n) \
-    for (type *x = (arr); x < (arr) + min(arrlen(arr), (n)); x++)
+    for (type *x = (arr); x < (arr) + min(arrl(arr), (n)); x++)
 // traverse elements in array starting from the end (reverse)
 #define eachr(type, x, arr) \
-    for (type *x = (arr) + arrlen(arr) - 1; x >= (arr); x--)
+    for (type *x = (arr) + arrl(arr) - 1; x >= (arr); x--)
 // traverse n elements in array starting from the end (reverse)
 #define eachrn(type, x, arr, n) \
-    for (type *x = (arr) + arrlen(arr) - 1; x >= (arr) + arrlen(arr) - (n); x--)
+    for (type *x = (arr) + arrl(arr) - 1; x >= (arr) + arrl(arr) - (n); x--)
 
 #define abs(x) \
     ((x) < 0 ? (-(x)) : (x))
@@ -42,7 +42,7 @@ typedef u64 usize;
 #define clamp(x, a, b) \
     (min(max((x), min((a), (b))), max((a), (b))))
 #define sqr(x) \
-    ((x)*(x))
+    ((x) * (x))
 
 // coroutine/fiber/green-thread
 // example:
@@ -107,15 +107,16 @@ typedef u64 usize;
     (strf((dest), sizeof(dest), format, __VA_ARGS__))
 
 // longer aliases.
-#define foreach each
-#define foreachn eachn
-#define foreachrev eachr
-#define foreachrevn eachrn
-#define strmatches streq
-#define strmatchesn streqn
-#define strlen2 strl
+#define arrlen        arrl
+#define foreach       each
+#define foreachn      eachn
+#define foreachrev    eachr
+#define foreachrevn   eachrn
+#define strmatches    streq
+#define strmatchesn   streqn
+#define strlen2       strl
 #define strstartswith strsw
-#define strendswith strew
+#define strendswith   strew
 
 typedef union v2 {
     struct { float x, y; };
@@ -200,6 +201,8 @@ usize strf(char *dest, usize n, char *format, ...);
 
 // memset, set n bytes from dest.
 void mems(void *dest, byte src, usize n);
+// check if n bytes from a and b are the same.
+int memeq(void *a, void *b, usize n);
 
 // random integer.
 // seed can be null.
@@ -225,19 +228,19 @@ float Q_rsqrt(float number)
 
 v2 v2add(v2 x1, v2 x2)
 {
-    v2 r = {{x1.f[0]+x2.f[0], x1.f[1]+x2.f[1]}};
+    v2 r = {{x1.f[0] + x2.f[0], x1.f[1] + x2.f[1]}};
     return r;
 }
 
 v2 v2sub(v2 x1, v2 x2)
 {
-    v2 r = {{x1.f[0]-x2.f[0],x1.f[1]-x2.f[1]}};
+    v2 r = {{x1.f[0] - x2.f[0], x1.f[1] - x2.f[1]}};
     return r;
 }
 
 v2 v2skl(v2 x, float n)
 {
-    v2 r = {{x.f[0]*n, x.f[1]*n}};
+    v2 r = {{x.f[0] * n, x.f[1] * n}};
     return r;
 }
 
@@ -253,26 +256,26 @@ v2 v2norm(v2 x)
     v2 r = x;
     if (len2 > 0) {
         len2 = Q_rsqrt(len2);
-        r = (v2){{x.f[0]*len2, x.f[1]*len2}};
+        r = (v2){{x.f[0] * len2, x.f[1] * len2}};
     }
     return r;
 }
 
 float v2dot(v2 x1, v2 x2)
 {
-    float r = (x1.f[0]*x2.f[0])+(x1.f[1]*x2.f[1]);
+    float r = (x1.f[0] * x2.f[0]) + (x1.f[1] * x2.f[1]);
     return r;
 }
 
 float v2len2(v2 x)
 {
-    float r = sqr(x.f[0])+sqr(x.f[1]);
+    float r = sqr(x.f[0]) + sqr(x.f[1]);
     return r;
 }
 
 float v2dist2(v2 src, v2 dest)
 {
-    float r = sqr(src.f[0]-dest.f[0])+sqr(src.f[1]-dest.f[1]);
+    float r = sqr(src.f[0] - dest.f[0]) + sqr(src.f[1] - dest.f[1]);
     return r;
 }
 
@@ -395,7 +398,7 @@ usize strdbl(char *dest, double x, usize n)
             *dest-- = 0;
         return 0;
     }
-    for (usize i = 0, m = r/2; i < m; i++) {
+    for (usize i = 0, m = r / 2; i < m; i++) {
         char last = *(dest - r + i);
         *(dest - r + i) = *(dest - (i + 1));
         *(dest - (i + 1)) = last;
@@ -417,14 +420,14 @@ usize strf(char *dest, usize n, char *format, ...)
     va_start(va, format);
     while (*format && dest - head < n) {
         int iscommand = *format == '%';
-        if (iscommand && *(format+1) == '%') {
+        if (iscommand && *(format + 1) == '%') {
             // skip %%.
             format++;
             format++;
             *dest++ = '%';
             continue;
         }
-        if (iscommand && *(format+1) == 'c') {
+        if (iscommand && *(format + 1) == 'c') {
             // skip %c.
             format++;
             format++;
@@ -432,7 +435,7 @@ usize strf(char *dest, usize n, char *format, ...)
             *dest++ = c;
             continue;
         }
-        if (iscommand && *(format+1) == 's') {
+        if (iscommand && *(format + 1) == 's') {
             // skip %s.
             format++;
             format++;
@@ -447,7 +450,7 @@ usize strf(char *dest, usize n, char *format, ...)
             }
             continue;
         }
-        if (iscommand && *(format+1) == '*' && *(format+2) == 's') {
+        if (iscommand && *(format + 1) == '*' && *(format + 2) == 's') {
             // skip %*s.
             format++;
             format++;
@@ -465,7 +468,7 @@ usize strf(char *dest, usize n, char *format, ...)
             }
             continue;
         }
-        if (iscommand && *(format+1) == 'x') {
+        if (iscommand && *(format + 1) == 'x') {
             // skip %x.
             format++;
             format++;
@@ -477,7 +480,7 @@ usize strf(char *dest, usize n, char *format, ...)
                 dest+=r;
             continue;
         }
-        if (iscommand && *(format+1) == 'd') {
+        if (iscommand && *(format + 1) == 'd') {
             // skip %d.
             format++;
             format++;
@@ -489,7 +492,7 @@ usize strf(char *dest, usize n, char *format, ...)
                 dest+=r;
             continue;
         }
-        if (iscommand && *(format+1) == 'f') {
+        if (iscommand && *(format + 1) == 'f') {
             // skip %f.
             format++;
             format++;
@@ -501,7 +504,7 @@ usize strf(char *dest, usize n, char *format, ...)
                 dest+=r;
             continue;
         }
-        if (iscommand && *(format+1) == 'v') {
+        if (iscommand && *(format + 1) == 'v') {
             // skip %v.
             format++;
             format++;
@@ -514,7 +517,7 @@ usize strf(char *dest, usize n, char *format, ...)
             if (!d)
                 *dest++ = '?';
             else
-                dest+=d;
+                dest += d;
             if (dest - head >= n)
                 goto finish;
             *dest++ = ':';
@@ -525,7 +528,7 @@ usize strf(char *dest, usize n, char *format, ...)
             if (!d)
                 *dest++ = '?';
             else
-                dest+=d;
+                dest += d;
             if (dest - head >= n)
                 goto finish;
             *dest++ = ')';
@@ -551,6 +554,21 @@ void mems(void *dest, byte src, usize n)
     byte *bdest = (byte *)dest;
     for (usize i = 0; i < n; i++)
         *bdest++ = src;
+}
+
+int memeq(void *a, void *b, usize n)
+{
+    if (!a || !b)
+        return 0;
+    byte *ba = (byte *) a;
+    byte *bb = (byte *) b;
+    for (usize i = 0; i < n; i++) {
+        if (*ba != *bb)
+            return 0;
+        ba++;
+        bb++;
+    }
+    return 1;
 }
 
 u32 randi(u32 *seed)
