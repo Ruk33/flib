@@ -1,0 +1,15 @@
+flib
+    just a simple library for things that i usually use and need.
+
+how to use?
+    this library is just a single header file. just copy "flib.h"
+    in your project. when you need to include the implementation, use:
+
+    #define flibc
+    #include "flib.h"
+
+tests
+    on windows, build and run the tests by executing build.bat.
+
+license
+    mit?
