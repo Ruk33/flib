@@ -139,7 +139,7 @@ usize strlen2(char *src);
 // dest can be null.
 // dest will be null terminated.
 // the amount of characters written is returned.
-usize stri64(char *dest, i64 x, usize n);
+usize stri64(char *dest, i64 x, u64 base, usize n);
 // convert double to string.
 // dest can be null.
 // dest will be null terminated.
@@ -303,14 +303,14 @@ usize strlen2(char *src)
     return r;
 }
 
-usize stri64(char *dest, i64 x, usize n)
+usize stri64(char *dest, i64 x, u64 base, usize n)
 {
     if (!dest || !n)
         return 0;
     int negative = x < 0;
     usize r = 0;
     // count digits in number.
-    for (i64 i = x; i; i /= 10)
+    for (i64 i = x; i; i /= base)
         r++;
     // if we can't store the whole number
     // just return.
@@ -321,9 +321,9 @@ usize stri64(char *dest, i64 x, usize n)
         *dest++ = '-';
     x = abs(x);
     for (usize i = 0; i < r; i++) {
-        i64 rem = x % 10;
-        x = x / 10;
-        *(dest + r - i - 1) = rem + '0';
+        i64 rem = x % base;
+        x = x / base;
+        *(dest + r - i - 1) = rem < 10 ? rem + '0' : 'a' + rem - 10;
     }
     // null terminator.
     *(dest + negative + r) = 0;
@@ -422,12 +422,24 @@ usize strf(char *dest, usize n, char *format, ...)
             }
             continue;
         }
+        if (*format + *(format+1) == '%' + 'x') {
+            // skip %x.
+            format++;
+            format++;
+            i64 x = va_arg(va, i64);
+            usize r = stri64(dest, x, 16, n - (dest - head));
+            if (!r)
+                *dest++ = '?';
+            else
+                dest+=r;
+            continue;
+        }
         if (*format + *(format+1) == '%' + 'd') {
             // skip %d.
             format++;
             format++;
             i64 d = va_arg(va, i64);
-            usize r = stri64(dest, d, n - (dest - head));
+            usize r = stri64(dest, d, 10, n - (dest - head));
             if (!r)
                 *dest++ = '?';
             else
