@@ -35,6 +35,7 @@ int main(void)
     assert(strendswith("something", "hing"));
     assert(!strendswith("something", "ahing"));
     assert(!strendswith("something", "hiang"));
+    assert(!strendswith("hing", "shing"));
 
     assert(streq("something", "something"));
     assert(!streq("something", ""));

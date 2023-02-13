@@ -306,7 +306,7 @@ int strsw(char *src, char *match)
 {
     if (!src || !match)
         return 0;
-    while (*match && *src == *match && (src++, match++));
+    while (*match && *src && *src == *match && (src++, match++, 1));
     int r = *match == 0;
     return r;
 }
@@ -318,12 +318,15 @@ int strew(char *src, char *match)
     char *srcend = src;
     char *matchend = match;
     // find end of src.
-    while (*srcend && srcend++);
+    while (*srcend && (srcend++, 1));
     // find end of match.
-    while (*matchend && matchend++);
+    while (*matchend && (matchend++, 1));
     // now check if they match.
-    while (match <= matchend && *srcend == *matchend && (srcend--, matchend--));
-    int r = match > matchend;
+    while (src < srcend && 
+           match < matchend && 
+           *srcend == *matchend && 
+           (srcend--, matchend--, 1));
+    int r = match == matchend && *srcend == *matchend;
     return r;
 }
 
@@ -331,7 +334,7 @@ int streq(char *a, char *b)
 {
     if (!a || !b)
         return 0;
-    while (*a && *b && *a == *b && (a++, b++));
+    while (*a && *b && *a == *b && (a++, b++, 1));
     int r = *a == 0 && *b == 0;
     return r;
 }
@@ -340,7 +343,7 @@ int streqn(char *a, char *b, usize n)
 {
     if (!a || !b || n == 0)
         return 0;
-    while (n > 0 && *a && *b && *a == *b && (a++, b++, n--));
+    while (n > 0 && *a && *b && *a == *b && (a++, b++, n--, 1));
     int r = n == 0;
     return r;
 }
@@ -350,7 +353,7 @@ usize strl(char *src)
     if (!src)
         return 0;
     usize r = 0;
-    while (*src && (r++, src++));
+    while (*src && (r++, src++, 1));
     return r;
 }
 
@@ -423,7 +426,7 @@ usize strf(char *dest, usize n, char *format, ...)
     char *head = dest;
     va_list va;
     va_start(va, format);
-    while (*format && dest - head < n) {
+    while (*format && (dest - head) < n) {
         int iscommand = *format == '%';
         if (iscommand && *(format + 1) == '%') {
             // skip %%.
