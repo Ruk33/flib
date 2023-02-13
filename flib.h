@@ -117,6 +117,9 @@ typedef u64 usize;
 #define strlen2       strl
 #define strstartswith strsw
 #define strendswith   strew
+#define memset2       mems
+#define memmatches    memeq
+#define memcpy2       memc
 
 typedef union v2 {
     struct { float x, y; };
@@ -203,6 +206,9 @@ usize strf(char *dest, usize n, char *format, ...);
 void mems(void *dest, byte src, usize n);
 // check if n bytes from a and b are the same.
 int memeq(void *a, void *b, usize n);
+// memcpy, copy n bytes from src to dest.
+// dest and src can be null.
+void memc(void *dest, void *src, usize n);
 
 // random integer.
 // seed can be null.
@@ -569,6 +575,16 @@ int memeq(void *a, void *b, usize n)
         bb++;
     }
     return 1;
+}
+
+void memc(void *dest, void *src, usize n)
+{
+    if (!dest || !src)
+        return;
+    byte *bdest = (byte *) dest;
+    byte *bsrc = (byte *) src;
+    for (usize i = 0; i < n; i++)
+        *bdest++ = *bsrc++;
 }
 
 u32 randi(u32 *seed)
