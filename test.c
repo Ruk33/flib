@@ -59,6 +59,8 @@ int main(void)
         printf("%d\n", *x);
     foreachrevn(int, x, arr, 3)
         printf("%d\n", *x);
+    mems(arr, 0, sizeof(arr));
+    assert((arr[0] + arr[1] + arr[2] + arr[3] + arr[4]) == 0);
 
     printf("random: %d\n", randi(0));
     printf("random: %d\n", randi(0));
@@ -80,8 +82,6 @@ int main(void)
     testcoroutine(&coro);
     testcoroutine(&coro);
 
-    printf("all good!\n");
-
     char buf[256] = {0};
     usize written = strf2(
         buf, 
@@ -94,6 +94,8 @@ int main(void)
         (v2){{26.31, 451245.12}}
     );
     printf("%d %s", written, buf);
+
+    printf("all good!\n");
 
     return 0;
 }

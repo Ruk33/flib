@@ -1,7 +1,7 @@
 flib
     just a simple library for things that i usually use and need.
 
-how to use?
+usage/installation
     this library is just a single header file. just copy "flib.h"
     in your project. when you need to include the implementation, use:
 
@@ -10,6 +10,69 @@ how to use?
 
 tests
     on windows, build and run the tests by executing build.bat.
+
+notes
+    - no heap memory is allocated.
+    - null can be safely used as parameter in all functions.
+    - no dependencies (only stdarg.h for strf)
+
+documentation
+    all the documentation resides in the flib.h file.
+    the functions and macros defined are:
+
+    #define arrl(x)
+    #define each(type, x, arr)
+    #define eachn(type, x, arr, n)
+    #define eachr(type, x, arr)
+    #define eachrn(type, x, arr, n)
+    #define abs(x)
+    #define min(x1, x2)
+    #define max(x1, x2)
+    #define clamp(x, a, b)
+    #define sqr(x)
+    #define cstart(ctx)
+    #define yield(id)
+    #define syield(id, _timeout, dt)
+    #define creset
+    #define cend
+    #define strf2(dest, format, ...)
+    #define arrlen        arrl
+    #define foreach       each
+    #define foreachn      eachn
+    #define foreachrev    eachr
+    #define foreachrevn   eachrn
+    #define strmatches    streq
+    #define strmatchesn   streqn
+    #define strlen2       strl
+    #define strstartswith strsw
+    #define strendswith   strew
+    #define memset2       mems
+    #define memmatches    memeq
+    #define memcpy2       memc
+    float Q_rsqrt(float number);
+    v2 v2add(v2 x1, v2 x2);
+    v2 v2sub(v2 x1, v2 x2);
+    v2 v2skl(v2 x, float n);
+    v2 v2dir2(v2 src, v2 dest);
+    v2 v2norm(v2 x);
+    float v2dot(v2 x1, v2 x2);
+    float v2len2(v2 x);
+    float v2dist2(v2 src, v2 dest);
+    int v2inrng(v2 target, v2 src, float r);
+    int v2inrect(v2 target, v2 src, float w, float h);
+    int strsw(char *src, char *match);
+    int strew(char *src, char *match);
+    int streq(char *a, char *b);
+    int streqn(char *a, char *b, usize n);
+    usize strl(char *src);
+    usize stri64(char *dest, i64 x, u64 base, usize n);
+    usize strdbl(char *dest, double x, usize n);
+    usize strf(char *dest, usize n, char *format, ...);
+    void mems(void *dest, byte src, usize n);
+    int memeq(void *a, void *b, usize n);
+    void memc(void *dest, void *src, usize n);
+    u32 randi(u32 *seed);
+    u32 randi2(u32 *seed, u32 lower, u32 upper);
 
 license
     mit?
