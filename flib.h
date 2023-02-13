@@ -192,7 +192,7 @@ usize strdbl(char *dest, double x, usize n);
 // write up to n bytes of formatted string into dest.
 // dest will be null terminated.
 // formats:
-// %%  = escapes % and writes %.
+// %%  = escapes % and only writes one %.
 // %c  = writes character.
 // %s  = writes strings up to null terminator.
 // %*s = writes n bytes of string. 
@@ -204,16 +204,19 @@ usize strdbl(char *dest, double x, usize n);
 // %v  = writes vector with format "(x:y)"
 usize strf(char *dest, usize n, char *format, ...);
 
-// memset, set n bytes from dest.
+// memset, set n bytes from src to dest.
+// dest can be null.
 void mems(void *dest, byte src, usize n);
 // check if n bytes from a and b are the same.
+// a and b can be null.
 int memeq(void *a, void *b, usize n);
 // memcpy, copy n bytes from src to dest.
 // dest and src can be null.
 void memc(void *dest, void *src, usize n);
 
 // random integer.
-// seed can be null.
+// seed can be null in which case, a hard coded
+// seed will be used instead.
 u32 randi(u32 *seed);
 // random integer between lower and upper.
 // seed can be null.
