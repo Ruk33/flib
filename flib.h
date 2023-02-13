@@ -18,6 +18,7 @@ typedef u8 byte;
 typedef i64 ssize;
 typedef u64 usize;
 
+// length of fixed array.
 #define arrl(x) \
     (sizeof(x) / sizeof(*(x)))
 // traverse elements in array.
@@ -98,6 +99,7 @@ typedef u64 usize;
         *(__coro) = (struct coroutine){0};  \
     } while (0)
 
+// end coroutine block.
 #define cend    \
         }       \
     } while (0)
@@ -260,10 +262,8 @@ v2 v2norm(v2 x)
 {
     float len2 = v2len2(x);
     v2 r = x;
-    if (len2 > 0) {
-        len2 = Q_rsqrt(len2);
-        r = (v2){{x.f[0] * len2, x.f[1] * len2}};
-    }
+    if (len2 > 0)
+        r = v2skl(r, Q_rsqrt(len2));
     return r;
 }
 
@@ -356,7 +356,7 @@ usize strl(char *src)
 
 usize stri64(char *dest, i64 x, u64 base, usize n)
 {
-    if (!dest || !n)
+    if (!dest || !n || !base)
         return 0;
     int negative = x < 0;
     usize r = 0;
@@ -387,7 +387,6 @@ usize strdbl(char *dest, double x, usize n)
         return 0;
     int negative = x < 0;
     usize r = 0;
-    x += 0.005;
     x = abs(x);
     i64 d = (i64)x;
     i64 dec = (i64)(x * 100) % 100;
@@ -448,7 +447,7 @@ usize strf(char *dest, usize n, char *format, ...)
             char *buf = va_arg(va, char *);
             if (!buf)
                 buf = "(null)";
-            usize len = strlen2(buf);
+            usize len = strl(buf);
             for (usize i = 0; i < len; i++) {
                 *dest++ = *buf++;
                 if (dest - head >= n)
@@ -464,7 +463,7 @@ usize strf(char *dest, usize n, char *format, ...)
             usize len = va_arg(va, usize);
             char *buf = va_arg(va, char *);
             if (!buf) {
-                len = 6;
+                len = sizeof("(null)") - 1;
                 buf = "(null)";
             }
             for (usize i = 0; i < len; i++) {
@@ -483,7 +482,7 @@ usize strf(char *dest, usize n, char *format, ...)
             if (!r)
                 *dest++ = '?';
             else
-                dest+=r;
+                dest += r;
             continue;
         }
         if (iscommand && *(format + 1) == 'd') {
@@ -495,7 +494,7 @@ usize strf(char *dest, usize n, char *format, ...)
             if (!r)
                 *dest++ = '?';
             else
-                dest+=r;
+                dest += r;
             continue;
         }
         if (iscommand && *(format + 1) == 'f') {
@@ -507,7 +506,7 @@ usize strf(char *dest, usize n, char *format, ...)
             if (!r)
                 *dest++ = '?';
             else
-                dest+=r;
+                dest += r;
             continue;
         }
         if (iscommand && *(format + 1) == 'v') {
@@ -518,8 +517,7 @@ usize strf(char *dest, usize n, char *format, ...)
             if (dest - head >= n)
                 goto finish;
             v2 v = va_arg(va, v2);
-            double dble = (double)v.f[0];
-            usize d = strdbl(dest, dble, n - (dest - head));
+            usize d = strdbl(dest, v.f[0], n - (dest - head));
             if (!d)
                 *dest++ = '?';
             else
@@ -529,8 +527,7 @@ usize strf(char *dest, usize n, char *format, ...)
             *dest++ = ':';
             if (dest - head >= n)
                 goto finish;
-            dble = (double)v.f[1];
-            d = strdbl(dest, dble, n - (dest - head));
+            d = strdbl(dest, v.f[1], n - (dest - head));
             if (!d)
                 *dest++ = '?';
             else
@@ -589,7 +586,7 @@ void memc(void *dest, void *src, usize n)
 
 u32 randi(u32 *seed)
 {
-    static u32 debugseed = 0;
+    static u32 debugseed = -324516438;
     if (!seed)
         seed = &debugseed;
     *seed = (214013 * (*seed) + 2531011);
