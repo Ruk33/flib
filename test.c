@@ -71,6 +71,7 @@ int main(void)
         assert(min(32, 1) == 1);
         assert(max(32, 1) == 32);
         assert(clamp(32, 30, 31) == 31);
+        assert(clamp(20, 15, 30) == 20);
         assert(clamp(10, 30, 31) == 30);
         assert(sqr(2) == 2*2);
     }
