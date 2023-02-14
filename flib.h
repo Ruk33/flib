@@ -191,6 +191,7 @@ usize stri64(char *dest, i64 x, u64 base, usize n);
 usize strdbl(char *dest, double x, usize n);
 // write up to n bytes of formatted string into dest.
 // dest will be null terminated.
+// returns number of bytes used/written (INCLUDING null terminator)
 // formats:
 // %%  = escapes % and only writes one %.
 // %c  = writes character.
@@ -548,11 +549,11 @@ usize strf(char *dest, usize n, char *format, ...)
 finish:
     va_end(va);
     // null terminator.
-    *dest = 0;
+    if ((dest - head) < n)
+        *dest++ = 0;
+    else
+        *(dest - 1) = 0;
     usize r = dest - head;
-    // don't count null terminator.
-    if (r)
-        r--;
     return r;
 }
 
