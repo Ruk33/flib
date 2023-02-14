@@ -42,6 +42,8 @@ typedef u64 usize;
     ((x1) > (x2) ? (x1) : (x2))
 #define clamp(x, a, b) \
     (min(max((x), min((a), (b))), max((a), (b))))
+#define lerp(x, _min, _max) \
+    (((_max) - (_min)) * (x) + (_min))
 #define sqr(x) \
     ((x) * (x))
 
@@ -156,8 +158,15 @@ float v2len2(v2 x);
 float v2dist2(v2 src, v2 dest);
 // check if target is inside the range at src.
 int v2inrng(v2 target, v2 src, float r);
-// check if target is inside a rect starting at src.
-int v2inrect(v2 target, v2 src, float w, float h);
+
+// check circle c1 with radius r1 collides with circle c2 with radius r2.
+int cchit(v2 c1, v2 c2, float r1, float r2);
+// check circle with radius r collides with point p.
+int cphit(v2 c, float r, v2 p);
+// check rectangle r with width w and height h collides with point p
+int rphit(v2 p, v2 r, float w, float h);
+// check rectangle r1 collides with rectangle r2.
+int rrhit(v2 r1, v2 r2, float w1, float h1, float w2, float h2);
 
 // check if string src starts with match.
 // both strings need to be null terminated.
@@ -303,6 +312,43 @@ int v2inrect(v2 target, v2 src, float w, float h)
         src.y     <= target.y &&
         src.y + h >  target.y
     );
+    return r;
+}
+
+int cchit(v2 c1, v2 c2, float r1, float r2)
+{
+    float d2 = v2dist2(c1, c2);
+    int r = sqr(r1 + r2) >= d2;
+    return r;
+}
+
+int cphit(v2 c, float r, v2 p)
+{
+    float d2 = v2dist2(c, p);
+    int result = d2 < sqr(r);
+    return result;
+}
+
+int rphit(v2 p, v2 r, float w, float h)
+{
+    int result = (
+        p.x >= min(r.x, r.x + w) && p.x <= max(r.x, r.x + w) &&
+        p.y >= min(r.y, r.y + h) && p.y <= max(r.y, r.y + h)
+    );
+    return result;
+}
+
+int rrhit(v2 r1, v2 r2, float w1, float h1, float w2, float h2)
+{
+    int xhit = (
+        max(r1.x, r1.x + w1) >= min(r2.x, r2.x + w2) &&
+        min(r1.x, r1.x + w1) <= max(r2.x, r2.x + w2)
+    );
+    int yhit = (
+        max(r1.y, r1.y + h1) >= min(r2.y, r2.y + h2) &&
+        min(r1.y, r1.y + h1) <= max(r2.y, r2.y + h2)
+    );
+    int r = xhit && yhit;
     return r;
 }
 
