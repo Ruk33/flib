@@ -3,14 +3,14 @@
 
 #include <stdarg.h>
 
-typedef unsigned char      u8;
-typedef unsigned short    u16;
-typedef unsigned int      u32;
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
 typedef unsigned int long u64;
 
-typedef signed char      i8;
-typedef signed short    i16;
-typedef signed int      i32;
+typedef signed char i8;
+typedef signed short i16;
+typedef signed int i32;
 typedef signed int long i64;
 
 typedef u8 byte;
@@ -110,6 +110,8 @@ typedef u64 usize;
 #define strf2(dest, format, ...) \
     (strf((dest), sizeof(dest), format, __VA_ARGS__))
 
+#define v2z (v2){0}
+
 // longer aliases.
 #define arrlen        arrl
 #define foreach       each
@@ -124,6 +126,7 @@ typedef u64 usize;
 #define memset2       mems
 #define memmatches    memeq
 #define memcpy2       memc
+#define v2zero        v2z
 
 typedef union v2 {
     struct { float x, y; };
