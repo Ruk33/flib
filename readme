@@ -20,6 +20,7 @@ documentation
     all the documentation resides in the flib.h file.
     the functions and macros defined are:
 
+    #define v2z
     #define arrl(x)
     #define each(type, x, arr)
     #define eachn(type, x, arr, n)
@@ -49,6 +50,7 @@ documentation
     #define memset2       mems
     #define memmatches    memeq
     #define memcpy2       memc
+    #define v2zero        v2z
     float Q_rsqrt(float number);
     v2 v2add(v2 x1, v2 x2);
     v2 v2sub(v2 x1, v2 x2);
