@@ -13,11 +13,9 @@ void testcoroutine(struct coroutine *coro)
         printf("this is the second state.\n");
         yield(2);
         printf("this is the third state.\n");
-        syield(
-            3, 
-            /* waiting time in seconds */ 3,
-            /* time past each time the function is called */ 2
-        );
+        syield(3, 
+               /* waiting time in seconds */ 3,
+               /* time past each time the function is called */ 2);
         printf("three seconds past!\n");
         creset;
     } cend;
@@ -145,18 +143,16 @@ int main(void)
     }
     {
         char b[256] = {0};
-        usize n = strf2(
-            b, 
-            "%s %d %v %f %x %*s %c sample.\n", 
-            "test", 
-            32, 
-            (v2){{2.25, 33.45}}, 
-            23.45, 
-            0xfafa, 
-            2, 
-            "lorem", 
-            'a'
-        );
+        usize n = strf2(b, 
+                        "%s %d %v %f %x %*s %c sample.\n", 
+                        "test", 
+                        32, 
+                        (v2){{2.25, 33.45}}, 
+                        23.45, 
+                        0xfafa, 
+                        2, 
+                        "lorem", 
+                        'a');
         assert(streq(b, "test 32 (2.25:33.45) 23.45 fafa lo a sample.\n"));
         assert(n == sizeof("test 32 (2.25:33.45) 23.45 fafa lo a sample.\n"));
         // strf adds a null terminator.
@@ -201,7 +197,7 @@ int main(void)
         testcoroutine(&coro);
         testcoroutine(&coro);
     }
-
+    
     printf("all good!\n");
     return 0;
 }

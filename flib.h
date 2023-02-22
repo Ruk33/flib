@@ -5,47 +5,47 @@
 
 typedef unsigned char u8;
 typedef unsigned short u16;
-typedef unsigned int u32;
-typedef unsigned int long u64;
+typedef unsigned long u32;
+typedef unsigned long long u64;
 
 typedef signed char i8;
 typedef signed short i16;
-typedef signed int i32;
-typedef signed int long i64;
+typedef signed long i32;
+typedef signed long long i64;
 
 typedef u8 byte;
 
-typedef i64 ssize;
-typedef u64 usize;
+typedef long long usize;
+typedef signed long long ssize;
 
 // length of fixed array.
 #define arrl(x) \
-    (sizeof(x) / sizeof(*(x)))
+(sizeof(x) / sizeof(*(x)))
 // traverse elements in array.
 #define each(type, x, arr) \
-    for (type *x = (arr); x < (arr) + arrl(arr); x++)
+for (type *x = (arr); x < (arr) + arrl(arr); x++)
 // traverse up to n elements in array.
 #define eachn(type, x, arr, n) \
-    for (type *x = (arr); x < (arr) + min(arrl(arr), (n)); x++)
+for (type *x = (arr); x < (arr) + min(arrl(arr), (n)); x++)
 // traverse elements in array starting from the end (reverse)
 #define eachr(type, x, arr) \
-    for (type *x = (arr) + arrl(arr) - 1; x >= (arr); x--)
+for (type *x = (arr) + arrl(arr) - 1; x >= (arr); x--)
 // traverse n elements in array starting from the end (reverse)
 #define eachrn(type, x, arr, n) \
-    for (type *x = (arr) + arrl(arr) - 1; x >= (arr) + arrl(arr) - (n); x--)
+for (type *x = (arr) + arrl(arr) - 1; x >= (arr) + arrl(arr) - (n); x--)
 
 #define abs(x) \
-    ((x) < 0 ? (-(x)) : (x))
+((x) < 0 ? (-(x)) : (x))
 #define min(x1, x2) \
-    ((x1) < (x2) ? (x1) : (x2))
+((x1) < (x2) ? (x1) : (x2))
 #define max(x1, x2) \
-    ((x1) > (x2) ? (x1) : (x2))
+((x1) > (x2) ? (x1) : (x2))
 #define clamp(x, a, b) \
-    (min(max((x), min((a), (b))), max((a), (b))))
+(min(max((x), min((a), (b))), max((a), (b))))
 #define lerp(x, _min, _max) \
-    (((_max) - (_min)) * (x) + (_min))
+(((_max) - (_min)) * (x) + (_min))
 #define sqr(x) \
-    ((x) * (x))
+((x) * (x))
 
 // coroutine/fiber/green-thread
 // example:
@@ -64,10 +64,10 @@ typedef u64 usize;
 //      } cend;
 // }
 #define cstart(ctx)                         \
-    do {                                    \
-        struct coroutine *__coro = (ctx);   \
-        switch((__coro)->state) {           \
-        case 0:
+do {                                    \
+struct coroutine *__coro = (ctx);   \
+switch((__coro)->state) {           \
+case 0:
 
 // yield and update the state of the coroutine.
 // id must be unique.
@@ -76,39 +76,39 @@ typedef u64 usize;
 // can't since any change can update your line
 // numbers and produce incorrect results.
 #define yield(id)               \
-    do {                        \
-        (__coro)->state = (id); \
-        return;                 \
-        case (id):;             \
-    } while (0)
+do {                        \
+(__coro)->state = (id); \
+return;                 \
+case (id):;             \
+} while (0)
 
 // sleep and yield until timeout has past.
 // dt = how much time has past (if you are writing
 //      a game, this would be the delta time of each
 //      frame)
 #define syield(id, _timeout, dt)        \
-    do {                                \
-        (__coro)->timeout = (_timeout); \
-        yield(id);                      \
-        (__coro)->timeout -= (dt);      \
-        if ((__coro)->timeout > 0)      \
-            return;                     \
-    } while(0)
+do {                                \
+(__coro)->timeout = (_timeout); \
+yield(id);                      \
+(__coro)->timeout -= (dt);      \
+if ((__coro)->timeout > 0)      \
+return;                     \
+} while(0)
 
 // reset the coroutine state to start from the beginning.
 #define creset                              \
-    do {                                    \
-        *(__coro) = (struct coroutine){0};  \
-    } while (0)
+do {                                    \
+*(__coro) = (struct coroutine){0};  \
+} while (0)
 
 // end coroutine block.
 #define cend    \
-        }       \
-    } while (0)
+}       \
+} while (0)
 
 // str format using fixed array as destination.
 #define strf2(dest, format, ...) \
-    (strf((dest), sizeof(dest), format, __VA_ARGS__))
+(strf((dest), sizeof(dest), format, __VA_ARGS__))
 
 #define v2z (v2){0}
 
@@ -309,12 +309,10 @@ int v2inrng(v2 target, v2 src, float range)
 
 int v2inrect(v2 target, v2 src, float w, float h)
 {
-    int r = (
-        src.x     <= target.x &&
-        src.x + w >  target.x &&
-        src.y     <= target.y &&
-        src.y + h >  target.y
-    );
+    int r = (src.x     <= target.x &&
+             src.x + w >= target.x &&
+             src.y     <= target.y &&
+             src.y + h >= target.y);
     return r;
 }
 
@@ -334,23 +332,17 @@ int cphit(v2 c, float r, v2 p)
 
 int rphit(v2 p, v2 r, float w, float h)
 {
-    int result = (
-        p.x >= min(r.x, r.x + w) && p.x <= max(r.x, r.x + w) &&
-        p.y >= min(r.y, r.y + h) && p.y <= max(r.y, r.y + h)
-    );
+    int result = (p.x >= min(r.x, r.x + w) && p.x <= max(r.x, r.x + w) &&
+                  p.y >= min(r.y, r.y + h) && p.y <= max(r.y, r.y + h));
     return result;
 }
 
 int rrhit(v2 r1, v2 r2, float w1, float h1, float w2, float h2)
 {
-    int xhit = (
-        max(r1.x, r1.x + w1) >= min(r2.x, r2.x + w2) &&
-        min(r1.x, r1.x + w1) <= max(r2.x, r2.x + w2)
-    );
-    int yhit = (
-        max(r1.y, r1.y + h1) >= min(r2.y, r2.y + h2) &&
-        min(r1.y, r1.y + h1) <= max(r2.y, r2.y + h2)
-    );
+    int xhit = (max(r1.x, r1.x + w1) >= min(r2.x, r2.x + w2) &&
+                min(r1.x, r1.x + w1) <= max(r2.x, r2.x + w2));
+    int yhit = (max(r1.y, r1.y + h1) >= min(r2.y, r2.y + h2) &&
+                min(r1.y, r1.y + h1) <= max(r2.y, r2.y + h2));
     int r = xhit && yhit;
     return r;
 }
@@ -533,7 +525,7 @@ usize strf(char *dest, usize n, char *format, ...)
             // skip %x.
             format++;
             format++;
-            i64 x = va_arg(va, i64);
+            i64 x = (i64)va_arg(va, i32);
             usize r = stri64(dest, x, 16, n - (dest - head));
             if (!r)
                 *dest++ = '?';
@@ -545,7 +537,7 @@ usize strf(char *dest, usize n, char *format, ...)
             // skip %d.
             format++;
             format++;
-            i64 d = va_arg(va, i64);
+            i64 d = (i64)va_arg(va, i32);
             usize r = stri64(dest, d, 10, n - (dest - head));
             if (!r)
                 *dest++ = '?';
@@ -595,7 +587,7 @@ usize strf(char *dest, usize n, char *format, ...)
         }
         *dest++ = *format++;
     }
-finish:
+    finish:
     va_end(va);
     // null terminator.
     if ((dest - head) < n)
