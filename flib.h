@@ -162,14 +162,12 @@ float v2dot(v2 x1, v2 x2);
 float v2len2(v2 x);
 // get squared distance from src to dest.
 float v2dist2(v2 src, v2 dest);
-// check if target is inside the range at src.
-int v2inrng(v2 target, v2 src, float r);
 
 // check circle c1 with radius r1 collides with circle c2 with radius r2.
 int cchit(v2 c1, v2 c2, float r1, float r2);
-// check circle with radius r collides with point p.
+// check if point p is inside circle c with radius r.
 int cphit(v2 c, float r, v2 p);
-// check rectangle r with width w and height h collides with point p
+// check if point p is inside rectangle r with width w and height h.
 int rphit(v2 p, v2 r, float w, float h);
 // check rectangle r1 collides with rectangle r2.
 int rrhit(v2 r1, v2 r2, float w1, float h1, float w2, float h2);
@@ -320,21 +318,6 @@ float v2len2(v2 x)
 float v2dist2(v2 src, v2 dest)
 {
     float r = sqr(src.f[0] - dest.f[0]) + sqr(src.f[1] - dest.f[1]);
-    return r;
-}
-
-int v2inrng(v2 target, v2 src, float range)
-{
-    int r = v2dist2(src, target) <= sqr(range);
-    return r;
-}
-
-int v2inrect(v2 target, v2 src, float w, float h)
-{
-    int r = (src.x     <= target.x &&
-             src.x + w >= target.x &&
-             src.y     <= target.y &&
-             src.y + h >= target.y);
     return r;
 }
 
