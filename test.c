@@ -21,6 +21,14 @@ void testcoroutine(struct coroutine *coro)
     } cend;
 }
 
+usize custom_formatter(char *dest, void *v, usize n)
+{
+    int x = *(int *)v;
+    x /= 10;
+    usize written = stri64(dest, x, 10, n);
+    return written;
+}
+
 int main(void)
 {
     {
@@ -142,6 +150,13 @@ int main(void)
         assert(streq(b, "12345.00"));
     }
     {
+        char *b1 = "this is a test";
+        char b2[]= "this is a test";
+        assert(strhash(b1) == strhash(b2));
+        char *b3 = "tihs is a test";
+        assert(strhash(b3) != strhash(b2));
+    }
+    {
         char b[256] = {0};
         usize n = strf2(b, 
                         "%s %d %v %f %x %*s %c sample.\n", 
@@ -158,6 +173,43 @@ int main(void)
         // strf adds a null terminator.
         assert(strf(b, 4, "%s", "tset") == 4);
         assert(streq(b, "tse"));
+        
+        int x = 30;
+        n = strf2(b,
+                  "%? my custom formatter.",
+                  custom_formatter,
+                  &x);
+        printf("%s\n", b);
+        assert(streq(b, "3 my custom formatter."));
+    }
+    {
+        usize id = 0;
+        usize ids[4] = {0};
+        int tmp = -1;
+        idget(&id, ids, arrl(ids));
+        assert(id == 0);
+        idget(&id, ids, arrl(ids));
+        assert(id == 1);
+        idget(&id, ids, arrl(ids));
+        assert(id == 2);
+        idget(&id, ids, arrl(ids));
+        assert(id == 3);
+        
+        iddone(ids, 2);
+        iddone(ids, 3);
+        
+        idget(&id, ids, arrl(ids));
+        assert(id == 3);
+        idget(&id, ids, arrl(ids));
+        assert(id == 2);
+        
+        idget(&id, ids, arrl(ids));
+        assert(id == 4);
+        assert(idget(&id, ids, arrl(ids)) == 0);
+        assert(idget(&id, ids, arrl(ids)) == 0);
+        assert(idget(&id, ids, arrl(ids)) == 0);
+        // make sure we don't overflow.
+        assert(tmp == -1);
     }
     {
         int r[] = {1,2,3,4};

@@ -110,6 +110,9 @@ do {                                    \
 #define strf2(dest, format, ...) \
 (strf((dest), sizeof(dest), format, __VA_ARGS__))
 
+#define idget2(dest, ids) \
+(idget((dest), (ids), arrl(ids)))
+
 #define v2z (v2){0}
 
 // longer aliases.
@@ -201,6 +204,8 @@ usize stri64(char *dest, i64 x, u64 base, usize n);
 // dest will be null terminated.
 // the amount of characters written is returned.
 usize strdbl(char *dest, double x, usize n);
+// build a hash from a string.
+usize strhash(char *src);
 // write up to n bytes of formatted string into dest.
 // dest will be null terminated.
 // returns number of bytes used/written (INCLUDING null terminator)
@@ -215,7 +220,24 @@ usize strdbl(char *dest, double x, usize n);
 // %d  = writes int.
 // %f  = writes float/double with 2 decimals.
 // %v  = writes vector with format "(x:y)"
+// %?  = use custom function to do the writting.
+//       example: strf(dest, n, "%?", custom_func, pointer_to_val);
+//       usize custom_func(char *dest, void *v, usize n)
+//       {
+//           // write to dest and return how many bytes were written.
+//           usize written = ...
+//           return written;
+//       }
 usize strf(char *dest, usize n, char *format, ...);
+
+// get a reusable id from ids without exceeding n ids.
+// 0 = error: no more space left; dest is null or ids is null.
+// 1 = success, using recycled id.
+// 2 = success, using new id.
+int idget(usize *dest, usize *ids, usize n);
+// mark the id as done so it can be recycled when
+// idget gets called again.
+void iddone(usize *ids, usize id);
 
 // memset, set n bytes from src to dest.
 // dest can be null.
@@ -464,6 +486,18 @@ usize strdbl(char *dest, double x, usize n)
     return r + 3 + negative;
 }
 
+// djb2 by Dan Bernstein.
+usize strhash(char *src)
+{
+    if (!src)
+        return 0;
+    unsigned long hash = 5381;
+    int c = 0;
+    while ((c = *src++))
+        hash = ((hash << 5) + hash) + c;
+    return hash;
+}
+
 usize strf(char *dest, usize n, char *format, ...)
 {
     if (!dest || !format)
@@ -508,13 +542,13 @@ usize strf(char *dest, usize n, char *format, ...)
             format++;
             format++;
             format++;
-            usize len = va_arg(va, usize);
+            u32 len = va_arg(va, u32);
             char *buf = va_arg(va, char *);
             if (!buf) {
                 len = sizeof("(null)") - 1;
                 buf = "(null)";
             }
-            for (usize i = 0; i < len; i++) {
+            for (u32 i = 0; i < len; i++) {
                 *dest++ = *buf++;
                 if (dest - head >= n)
                     goto finish;
@@ -585,6 +619,16 @@ usize strf(char *dest, usize n, char *format, ...)
             *dest++ = ')';
             continue;
         }
+        if (iscommand && *(format + 1) == '?') {
+            // skip %?
+            format++;
+            format++;
+            usize (*f)(char *, void *, usize) = va_arg(va, void *);
+            void *v = va_arg(va, void *);
+            usize written = f(dest, v, n - (dest - head));
+            dest += written;
+            continue;
+        }
         *dest++ = *format++;
     }
     finish:
@@ -596,6 +640,42 @@ usize strf(char *dest, usize n, char *format, ...)
         *(dest - 1) = 0;
     usize r = dest - head;
     return r;
+}
+
+int idget(usize *dest, usize *ids, usize n)
+{
+    int result = 0;
+    if (!ids)
+        return result;
+    if (!dest)
+        return result;
+    if (!n)
+        return result;
+    usize id = ids[0];
+    if (id > n)
+        return 0;
+    if (ids[id]) {
+        *dest = id;
+        ids[0] = ids[id];
+        result = 1;
+    } else {
+        if (id + 1 > n) {
+            result = 0;
+        } else {
+            *dest = id;
+            ids[0] = id + 1;
+            result = 2;
+        }
+    }
+    return result;
+}
+
+void iddone(usize *ids, usize id)
+{
+    if (!ids)
+        return;
+    ids[id] = ids[0];
+    ids[0]  = id;
 }
 
 void mems(void *dest, byte src, usize n)

@@ -37,6 +37,7 @@ documentation
     #define creset
     #define cend
     #define strf2(dest, format, ...)
+    #define idget2(dest, ids)
     #define arrlen        arrl
     #define foreach       each
     #define foreachn      eachn
@@ -69,7 +70,10 @@ documentation
     usize strl(char *src);
     usize stri64(char *dest, i64 x, u64 base, usize n);
     usize strdbl(char *dest, double x, usize n);
+    usize strhash(char *src);
     usize strf(char *dest, usize n, char *format, ...);
+    int idget(usize *dest, usize *ids, usize n);
+    void iddone(usize *ids, usize id);
     void mems(void *dest, byte src, usize n);
     int memeq(void *a, void *b, usize n);
     void memc(void *dest, void *src, usize n);
