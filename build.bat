@@ -1,2 +1,2 @@
 @echo off
-zig cc -Wall -Wextra -Werror test.c -o test.exe && test
+zig cc -std=c99 -Wall -Wextra -Werror test.c -o test.exe && test
