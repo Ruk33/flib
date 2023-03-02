@@ -38,6 +38,7 @@ documentation
     #define cend
     #define strf2(dest, format, ...)
     #define idget2(dest, ids)
+	#define v2z
     #define arrlen        arrl
     #define foreach       each
     #define foreachn      eachn
@@ -61,6 +62,10 @@ documentation
     float v2dot(v2 x1, v2 x2);
     float v2len2(v2 x);
     float v2dist2(v2 src, v2 dest);
+    int cchit(v2 c1, v2 c2, float r1, float r2);
+    int cphit(v2 c, float r, v2 p);
+    int rphit(v2 r, float w, float h, v2 p);
+    int rrhit(v2 r1, v2 r2, float w1, float h1, float w2, float h2);
     int strsw(char *src, char *match);
     int strew(char *src, char *match);
     int streq(char *a, char *b);
@@ -70,6 +75,7 @@ documentation
     usize strdbl(char *dest, double x, usize n);
     usize strhash(char *src);
     usize strf(char *dest, usize n, char *format, ...);
+    usize vstrf(char *dest, usize n, char *format, va_list va)
     int idget(usize *dest, usize *ids, usize n);
     void iddone(usize *ids, usize id);
     void mems(void *dest, byte src, usize n);

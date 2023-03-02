@@ -20,7 +20,7 @@ typedef signed long long ssize;
 
 // length of fixed array.
 #define arrl(x) \
-(sizeof(x) / sizeof(*(x)))
+((usize)(sizeof(x) / sizeof(*(x))))
 // traverse elements in array.
 #define each(type, x, arr) \
 for (type *x = (arr); x < (arr) + arrl(arr); x++)
@@ -168,7 +168,7 @@ int cchit(v2 c1, v2 c2, float r1, float r2);
 // check if point p is inside circle c with radius r.
 int cphit(v2 c, float r, v2 p);
 // check if point p is inside rectangle r with width w and height h.
-int rphit(v2 p, v2 r, float w, float h);
+int rphit(v2 r, float w, float h, v2 p);
 // check rectangle r1 collides with rectangle r2.
 int rrhit(v2 r1, v2 r2, float w1, float h1, float w2, float h2);
 
@@ -227,6 +227,7 @@ usize strhash(char *src);
 //           return written;
 //       }
 usize strf(char *dest, usize n, char *format, ...);
+usize vstrf(char *dest, usize n, char *format, va_list va);
 
 // get a reusable id from ids without exceeding n ids.
 // 0 = error: no more space left; dest is null or ids is null.
@@ -335,7 +336,7 @@ int cphit(v2 c, float r, v2 p)
     return result;
 }
 
-int rphit(v2 p, v2 r, float w, float h)
+int rphit(v2 r, float w, float h, v2 p)
 {
     int result = (p.x >= min(r.x, r.x + w) && p.x <= max(r.x, r.x + w) &&
                   p.y >= min(r.y, r.y + h) && p.y <= max(r.y, r.y + h));
@@ -483,11 +484,20 @@ usize strhash(char *src)
 
 usize strf(char *dest, usize n, char *format, ...)
 {
+    va_list va;
+    va_start(va, format);
+    usize r = vstrf(dest, n, format, va);
+    va_end(va);
+    return r;
+}
+
+usize vstrf(char *dest, usize n, char *format, va_list va)
+{
     if (!dest || !format)
         return 0;
     char *head = dest;
-    va_list va;
-    va_start(va, format);
+    // va_list va;
+    // va_start(va, format);
     while (*format && (dest - head) < n) {
         int iscommand = *format == '%';
         if (iscommand && *(format + 1) == '%') {
@@ -615,7 +625,7 @@ usize strf(char *dest, usize n, char *format, ...)
         *dest++ = *format++;
     }
     finish:
-    va_end(va);
+    // va_end(va);
     // null terminator.
     if ((dest - head) < n)
         *dest++ = 0;
