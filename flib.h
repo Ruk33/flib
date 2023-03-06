@@ -261,6 +261,7 @@ u32 randi2(u32 *seed, u32 lower, u32 upper);
 #endif
 
 #ifdef flibc
+#undef flibc
 
 float Q_rsqrt(float number)
 {
