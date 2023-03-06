@@ -100,8 +100,6 @@ int main(void)
         // r = v2dot
         assert(v2len2(x1) == sqr(x1.f[0]) + sqr(x1.f[1]));
         assert(v2dist2(x1, x2) == v2len2(v2sub(x2, x1)));
-        // r = v2inrng
-        // r = v2inrect
     }
     {
         assert(strstartswith("something", "som"));
@@ -137,17 +135,23 @@ int main(void)
     }
     {
         char b[32] = {0};
-        assert(stri64(b, 12345, 10, sizeof(b)) == 5);
+        assert(stri64(b, 12345, 10, sizeof(b)) == 6);
         assert(streq(b, "12345"));
+        stri64(b, 0, 10, sizeof(b));
+        assert(streq(b, "0"));
+        assert(stri64(b, -32, 10, sizeof(b)) == 4);
+        assert(streq(b, "-32"));
     }
     {
         char b[32] = {0};
-        assert(strdbl(b, 12345.321, sizeof(b)) == 8);
+        assert(strdbl(b, 12345.321, sizeof(b)) == 9);
         assert(streq(b, "12345.32"));
-        assert(strdbl(b, -12345.321, sizeof(b)) == 9);
+        assert(strdbl(b, -12345.321, sizeof(b)) == 10);
         assert(streq(b, "-12345.32"));
-        assert(strdbl(b, 12345, sizeof(b)) == 8);
+        assert(strdbl(b, 12345, sizeof(b)) == 9);
         assert(streq(b, "12345.00"));
+        assert(strdbl(b, 0.0f, sizeof(b)) == 4);
+        assert(streq(b, ".00"));
     }
     {
         char *b1 = "this is a test";

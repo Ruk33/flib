@@ -195,12 +195,12 @@ usize strl(char *src);
 // convert integer to string.
 // dest can be null.
 // dest will be null terminated.
-// the amount of characters written is returned.
+// the amount of characters written is returned (including null terminator)
 usize stri64(char *dest, i64 x, u64 base, usize n);
 // convert double to string.
 // dest can be null.
 // dest will be null terminated.
-// the amount of characters written is returned.
+// the amount of characters written is returned (including null terminator)
 usize strdbl(char *dest, double x, usize n);
 // build a hash from a string.
 usize strhash(char *src);
@@ -218,7 +218,9 @@ usize strhash(char *src);
 // %d  = writes int.
 // %f  = writes float/double with 2 decimals.
 // %v  = writes vector with format "(x:y)"
-// %?  = use custom function to do the writting.
+// %?  = use custom function to do the writting. IMPORTANT, make sure
+//       your function returns the proper amount of bytes written, 
+//       INCLUDING the null terminator.
 //       example: strf(dest, n, "%?", custom_func, pointer_to_val);
 //       usize custom_func(char *dest, void *v, usize n)
 //       {
@@ -413,26 +415,27 @@ usize stri64(char *dest, i64 x, u64 base, usize n)
     if (!dest || !n || !base)
         return 0;
     int negative = x < 0;
-    usize r = 0;
+    // if zero, make sure we at least have 1 digit.
+    usize r = x ? 0 : 1;
+    x = abs(x);
     // count digits in number.
     for (i64 i = x; i; i /= base)
         r++;
-    // if we can't store the whole number
-    // just return.
+    // if we can't store the whole number just return.
     if (r + negative >= n)
         return 0;
     // add negative symbol.
     if (negative)
         *dest++ = '-';
-    x = abs(x);
     for (usize i = 0; i < r; i++) {
         i64 rem = x % base;
         x = x / base;
         *(dest + r - i - 1) = rem < 10 ? rem + '0' : 'a' + rem - 10;
     }
     // null terminator.
-    *(dest + negative + r) = 0;
-    return r + negative;
+    *(dest + r) = 0;
+    // +1 null terminator.
+    return r + 1 + negative;
 }
 
 usize strdbl(char *dest, double x, usize n)
@@ -451,7 +454,11 @@ usize strdbl(char *dest, double x, usize n)
         r++;
         d /= 10;
     }
-    if (r + 3 + negative >= n) {
+    // +1 = .
+    // +2 = decimals
+    // +1 = null
+    // +4 total.
+    if (r + 4 + negative >= n) {
         // if there isn't enough space, roll back what we wrote.
         for (usize i = 0; i < r + negative; i++)
             *dest-- = 0;
@@ -467,7 +474,7 @@ usize strdbl(char *dest, double x, usize n)
     *dest++ = (dec % 10) + '0';
     // null terminator.
     *dest = 0;
-    return r + 3 + negative;
+    return r + 4 + negative;
 }
 
 // djb2 by Dan Bernstein.
@@ -556,8 +563,9 @@ usize vstrf(char *dest, usize n, char *format, va_list va)
             usize r = stri64(dest, x, 16, n - (dest - head));
             if (!r)
                 *dest++ = '?';
+            // don't include the null terminator yet.
             else
-                dest += r;
+                dest += r - 1;
             continue;
         }
         if (iscommand && *(format + 1) == 'd') {
@@ -568,8 +576,9 @@ usize vstrf(char *dest, usize n, char *format, va_list va)
             usize r = stri64(dest, d, 10, n - (dest - head));
             if (!r)
                 *dest++ = '?';
+            // don't include the null terminator yet.
             else
-                dest += r;
+                dest += r - 1;
             continue;
         }
         if (iscommand && *(format + 1) == 'f') {
@@ -580,8 +589,9 @@ usize vstrf(char *dest, usize n, char *format, va_list va)
             usize r = strdbl(dest, f, n - (dest - head));
             if (!r)
                 *dest++ = '?';
+            // don't include the null terminator yet.
             else
-                dest += r;
+                dest += r - 1;
             continue;
         }
         if (iscommand && *(format + 1) == 'v') {
@@ -595,8 +605,9 @@ usize vstrf(char *dest, usize n, char *format, va_list va)
             usize d = strdbl(dest, v.f[0], n - (dest - head));
             if (!d)
                 *dest++ = '?';
+            // don't include the null terminator yet.
             else
-                dest += d;
+                dest += d - 1;
             if (dest - head >= n)
                 goto finish;
             *dest++ = ':';
@@ -605,8 +616,9 @@ usize vstrf(char *dest, usize n, char *format, va_list va)
             d = strdbl(dest, v.f[1], n - (dest - head));
             if (!d)
                 *dest++ = '?';
+            // don't include the null terminator yet.
             else
-                dest += d;
+                dest += d - 1;
             if (dest - head >= n)
                 goto finish;
             *dest++ = ')';
@@ -619,7 +631,8 @@ usize vstrf(char *dest, usize n, char *format, va_list va)
             usize (*f)(char *, void *, usize) = va_arg(va, void *);
             void *v = va_arg(va, void *);
             usize written = f(dest, v, n - (dest - head));
-            dest += written;
+            // expect null terminator but don't include it yet.
+            dest += written - 1;
             continue;
         }
         *dest++ = *format++;
