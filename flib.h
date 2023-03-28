@@ -42,8 +42,8 @@ for (type *x = (arr) + arrl(arr) - 1; x >= (arr) + arrl(arr) - (n); x--)
 ((x1) > (x2) ? (x1) : (x2))
 #define clamp(x, a, b) \
 (min(max((x), min((a), (b))), max((a), (b))))
-#define lerp(x, _min, _max) \
-(((_max) - (_min)) * (x) + (_min))
+#define lerp(x, a, b) \
+((a) * (1 - (x)) + ((b) * (x)))
 #define sqr(x) \
 ((x) * (x))
 
@@ -659,7 +659,7 @@ int idget(usize *dest, usize *ids, usize n)
     if (!n)
         return result;
     usize id = ids[0];
-    if (id > n)
+    if (id >= n)
         return 0;
     if (ids[id]) {
         *dest = id;

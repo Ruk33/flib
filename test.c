@@ -79,6 +79,9 @@ int main(void)
         assert(clamp(32, 30, 31) == 31);
         assert(clamp(20, 15, 30) == 20);
         assert(clamp(10, 30, 31) == 30);
+        assert(lerp(0.5, 1, 2) - 1.5 <= 0.001);
+        assert(lerp(1, 1, 2) == 2);
+        assert(lerp(0, 1, 2) == 1);
         assert(sqr(2) == 2*2);
     }
     {
@@ -183,7 +186,6 @@ int main(void)
                   "%? my custom formatter.",
                   custom_formatter,
                   &x);
-        printf("%s\n", b);
         assert(streq(b, "3 my custom formatter."));
     }
     {
@@ -207,8 +209,6 @@ int main(void)
         idget(&id, ids, arrl(ids));
         assert(id == 2);
         
-        idget(&id, ids, arrl(ids));
-        assert(id == 4);
         assert(idget(&id, ids, arrl(ids)) == 0);
         assert(idget(&id, ids, arrl(ids)) == 0);
         assert(idget(&id, ids, arrl(ids)) == 0);

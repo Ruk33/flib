@@ -20,7 +20,6 @@ documentation
     all the documentation resides in the flib.h file.
     the functions and macros defined are:
 
-    #define v2z
     #define arrl(x)
     #define each(type, x, arr)
     #define eachn(type, x, arr, n)
@@ -30,6 +29,7 @@ documentation
     #define min(x1, x2)
     #define max(x1, x2)
     #define clamp(x, a, b)
+    #define lerp(x, a, b)
     #define sqr(x)
     #define cstart(ctx)
     #define yield(id)
@@ -38,7 +38,7 @@ documentation
     #define cend
     #define strf2(dest, format, ...)
     #define idget2(dest, ids)
-	#define v2z
+    #define v2z
     #define arrlen        arrl
     #define foreach       each
     #define foreachn      eachn
