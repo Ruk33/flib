@@ -10,6 +10,7 @@ usage/installation
 
 tests
     on windows, build and run the tests by executing build.bat.
+    on linux, build and run the tests by executing build.sh.
 
 notes
     - no heap memory is allocated.
