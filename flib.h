@@ -1,57 +1,40 @@
-#ifndef flibh
-#define flibh
+#define array_length(x) \
+	((sizeof(x) / sizeof(*(x))))
 
-#include <stdarg.h>
+#define for_each(type, x, arr) \
+	for (type *x = (arr); x < (arr) + array_length(arr); x++)
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned long u32;
-typedef unsigned long long u64;
+#define for_each_n(type, x, arr, n) \
+	for (type *x = (arr); x < (arr) + min(array_length(arr), (n)); x++)
 
-typedef signed char i8;
-typedef signed short i16;
-typedef signed long i32;
-typedef signed long long i64;
+#define for_each_reverse(type, x, arr) \
+	for (type *x = (arr) + array_length(arr) - 1; x >= (arr); x--)
 
-typedef u8 byte;
-
-typedef long long usize;
-typedef signed long long ssize;
-
-// length of fixed array.
-#define arrl(x) \
-((usize)(sizeof(x) / sizeof(*(x))))
-// traverse elements in array.
-#define each(type, x, arr) \
-for (type *x = (arr); x < (arr) + arrl(arr); x++)
-// traverse up to n elements in array.
-#define eachn(type, x, arr, n) \
-for (type *x = (arr); x < (arr) + min(arrl(arr), (n)); x++)
-// traverse elements in array starting from the end (reverse)
-#define eachr(type, x, arr) \
-for (type *x = (arr) + arrl(arr) - 1; x >= (arr); x--)
-// traverse n elements in array starting from the end (reverse)
-#define eachrn(type, x, arr, n) \
-for (type *x = (arr) + arrl(arr) - 1; x >= (arr) + arrl(arr) - (n); x--)
+#define for_each_reverse_n(type, x, arr, n)			\
+	for (											\
+		type *x = (arr) + array_length(arr) - 1;	\
+		x >= (arr) + array_length(arr) - (n);		\
+		x--											\
+	)
 
 #define abs(x) \
-((x) < 0 ? (-(x)) : (x))
-#define min(x1, x2) \
-((x1) < (x2) ? (x1) : (x2))
-#define max(x1, x2) \
-((x1) > (x2) ? (x1) : (x2))
+	((x) < 0 ? (-(x)) : (x))
+#define min(a, b) \
+	((a) < (b) ? (a) : (b))
+#define max(a, b) \
+	((a) > (b) ? (a) : (b))
 #define clamp(x, a, b) \
-(min(max((x), min((a), (b))), max((a), (b))))
+	(min(max((x), min((a), (b))), max((a), (b))))
 #define lerp(x, a, b) \
-((a) * (1 - (x)) + ((b) * (x)))
+	((a) * (1 - (x)) + ((b) * (x)))
 #define sqr(x) \
-((x) * (x))
+	((x) * (x))
 
 // coroutine/fiber/green-thread
 // example:
 // void mycoroutine(struct coroutine *ctx)
 // {
-//      cstart(ctx) {
+//      coroutine_start(ctx) {
 //          // on first call, this will be executed.
 //          // then exit.
 //          yield(1);
@@ -60,14 +43,14 @@ for (type *x = (arr) + arrl(arr) - 1; x >= (arr) + arrl(arr) - (n); x--)
 //          yield(2)
 //          // third call, this chunk will execute, restarting
 //          // the coroutine state to start from the beginning.
-//          creset;
-//      } cend;
+//          reset;
+//      } coroutine_end;
 // }
-#define cstart(ctx)                         \
-do {                                    \
-struct coroutine *__coro = (ctx);   \
-switch((__coro)->state) {           \
-case 0:
+#define coroutine_start(ctx)				\
+	do {									\
+		struct coroutine *__coro = (ctx);	\
+		switch ((__coro)->state) {			\
+		case 0:
 
 // yield and update the state of the coroutine.
 // id must be unique.
@@ -75,135 +58,109 @@ case 0:
 // hot-reload your code. if you do though, you
 // can't since any change can update your line
 // numbers and produce incorrect results.
-#define yield(id)               \
-do {                        \
-(__coro)->state = (id); \
-return;                 \
-case (id):;             \
-} while (0)
+#define yield(id)				\
+	do {						\
+		(__coro)->state = (id);	\
+		return;					\
+		case (id):;				\
+	} while (0)
 
 // sleep and yield until timeout has past.
 // dt = how much time has past (if you are writing
 //      a game, this would be the delta time of each
 //      frame)
-#define syield(id, _timeout, dt)        \
-do {                                \
-(__coro)->timeout = (_timeout); \
-yield(id);                      \
-(__coro)->timeout -= (dt);      \
-if ((__coro)->timeout > 0)      \
-return;                     \
-} while(0)
+#define syield(id, _timeout, dt)		\
+	do {								\
+		(__coro)->timeout = (_timeout);	\
+		yield(id);						\
+		(__coro)->timeout -= (dt);		\
+		if ((__coro)->timeout > 0)		\
+			return;						\
+	} while(0)
 
 // reset the coroutine state to start from the beginning.
-#define creset                              \
-do {                                    \
-*(__coro) = (struct coroutine){0};  \
-} while (0)
+#define reset								\
+	do {									\
+		*(__coro) = (struct coroutine){0};	\
+	} while (0)
 
 // end coroutine block.
-#define cend    \
-}       \
-} while (0)
+#define coroutine_end	\
+		}				\
+	} while (0)
 
 // str format using fixed array as destination.
-#define strf2(dest, format, ...) \
-(strf((dest), sizeof(dest), format, __VA_ARGS__))
+#define strf_ex(dest, format, ...) \
+	(strf((dest), sizeof(dest), (format), __VA_ARGS__))
 
-#define idget2(dest, ids) \
-(idget((dest), (ids), arrl(ids)))
-
-#define v2z (v2){0}
-
-// longer aliases.
-#define arrlen        arrl
-#define foreach       each
-#define foreachn      eachn
-#define foreachrev    eachr
-#define foreachrevn   eachrn
-#define strmatches    streq
-#define strmatchesn   streqn
-#define strlen2       strl
-#define strstartswith strsw
-#define strendswith   strew
-#define memset2       mems
-#define memmatches    memeq
-#define memcpy2       memc
-#define v2zero        v2z
+#define id_get_ex(dest, ids) \
+	(id_get((dest), (ids), array_length(ids)))
 
 typedef union v2 {
-    struct { float x, y; };
-    struct { float w, h; };
-    float f[2];
+	struct { float x, y; };
+	struct { float w, h; };
+	float f[2];
 } v2;
 
 struct coroutine {
-    u32 state;
-    float timeout;
+	unsigned int state;
+	float timeout;
 };
 
 // fast inverse square root.
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
-float Q_rsqrt(float number);
+float q_rsqrt(float number);
 
-// add x1 and x2.
-v2 v2add(v2 x1, v2 x2);
-// subtract x1 and x2.
-v2 v2sub(v2 x1, v2 x2);
-// multiply/scale vector x by n.
-v2 v2skl(v2 x, float n);
+v2 v2_add(v2 x1, v2 x2);
+v2 v2_sub(v2 x1, v2 x2);
+v2 v2_scale(v2 x, float n);
 // get normalized/direction from src to dest.
-v2 v2dir2(v2 src, v2 dest);
-// normalize vector x.
-v2 v2norm(v2 x);
-// dot product between x1 and x2.
-float v2dot(v2 x1, v2 x2);
-// get squared length of x.
-float v2len2(v2 x);
-// get squared distance from src to dest.
-float v2dist2(v2 src, v2 dest);
+v2 v2_direction_to(v2 src, v2 dest);
+v2 v2_normalize(v2 x);
+float v2_dot(v2 x1, v2 x2);
+float v2_sqr_length(v2 x);
+float v2_sqr_distance(v2 src, v2 dest);
 
 // check circle c1 with radius r1 collides with circle c2 with radius r2.
-int cchit(v2 c1, v2 c2, float r1, float r2);
+int cc_hit(v2 c1, v2 c2, float r1, float r2);
 // check if point p is inside circle c with radius r.
-int cphit(v2 c, float r, v2 p);
+int cp_hit(v2 c, float r, v2 p);
 // check if point p is inside rectangle r with width w and height h.
-int rphit(v2 r, float w, float h, v2 p);
+int rp_hit(v2 r, float w, float h, v2 p);
 // check rectangle r1 collides with rectangle r2.
-int rrhit(v2 r1, v2 r2, float w1, float h1, float w2, float h2);
+int rr_hit(v2 r1, v2 r2, float w1, float h1, float w2, float h2);
 
 // check if string src starts with match.
 // both strings need to be null terminated.
 // src and match can be null.
-int strsw(char *src, char *match);
+int str_starts_with(char *src, char *match);
+int str_starts_with_n(char *src, char *match, unsigned int n);
 // check if string src ends with match.
 // both strings need to be null terminated.
 // src and match can be null.
-int strew(char *src, char *match);
+int str_ends_with(char *src, char *match);
+int str_ends_with_n(char *src, char *match, unsigned int n);
 // check if string a and b are equal.
 // both strings need to be null terminated.
 // a and b can be null.
-int streq(char *a, char *b);
-// check if the first n characters of a and b are equal.
-// both strings need to be null terminated.
-// a and b can be null.
-int streqn(char *a, char *b, usize n);
+int str_equals(char *a, char *b);
+int str_equals_n(char *a, char *b, unsigned int n);
 // get length of src.
 // src must be null terminated.
 // src can be null.
-usize strl(char *src);
-// convert integer to string.
+unsigned int str_length(char *src);
+// convert integer x to string.
 // dest can be null.
 // dest will be null terminated.
 // the amount of characters written is returned (including null terminator)
-usize stri64(char *dest, i64 x, u64 base, usize n);
-// convert double to string.
+unsigned int str_int(char *dest, int x, unsigned int base, unsigned int n);
+// convert double x to string.
 // dest can be null.
 // dest will be null terminated.
 // the amount of characters written is returned (including null terminator)
-usize strdbl(char *dest, double x, usize n);
+unsigned int str_double(char *dest, double x, unsigned int n);
 // build a hash from a string.
-usize strhash(char *src);
+unsigned int str_hash(char *src);
 // write up to n bytes of formatted string into dest.
 // dest will be null terminated.
 // returns number of bytes used/written (INCLUDING null terminator)
@@ -228,513 +185,26 @@ usize strhash(char *src);
 //           usize written = ...
 //           return written;
 //       }
-usize strf(char *dest, usize n, char *format, ...);
-usize vstrf(char *dest, usize n, char *format, va_list va);
+unsigned int strf(char *dest, unsigned int n, char *format, ...);
+unsigned int vstrf(char *dest, unsigned int n, char *format, va_list va);
 
 // get a reusable id from ids without exceeding n ids.
 // 0 = error: no more space left; dest is null or ids is null.
 // 1 = success, using recycled id.
 // 2 = success, using new id.
-int idget(usize *dest, usize *ids, usize n);
+int id_get(unsigned int *dest, unsigned int *ids, unsigned int n);
 // mark the id as done so it can be recycled when
-// idget gets called again.
-void iddone(usize *ids, usize id);
-
-// memset, set n bytes from src to dest.
-// dest can be null.
-void mems(void *dest, byte src, usize n);
-// check if n bytes from a and b are the same.
-// a and b can be null.
-int memeq(void *a, void *b, usize n);
-// memcpy, copy n bytes from src to dest.
-// dest and src can be null.
-void memc(void *dest, void *src, usize n);
+// id_get gets called again.
+void id_recycle(unsigned int *ids, unsigned int id);
 
 // random integer.
 // seed can be null in which case, a hard coded
 // seed will be used instead.
-u32 randi(u32 *seed);
+unsigned int random_int(unsigned int *seed);
 // random integer between lower and upper.
 // seed can be null.
-u32 randi2(u32 *seed, u32 lower, u32 upper);
-
-#endif
-
-#ifdef flibc
-#undef flibc
-
-float Q_rsqrt(float number)
-{
-    union {
-        float f;
-        unsigned int i;
-    } conv = { .f = number };
-    conv.i  = 0x5f3759df - (conv.i >> 1);
-    conv.f *= 1.5F - (number * 0.5F * conv.f * conv.f);
-    return conv.f;
-}
-
-v2 v2add(v2 x1, v2 x2)
-{
-    v2 r = {{x1.f[0] + x2.f[0], x1.f[1] + x2.f[1]}};
-    return r;
-}
-
-v2 v2sub(v2 x1, v2 x2)
-{
-    v2 r = {{x1.f[0] - x2.f[0], x1.f[1] - x2.f[1]}};
-    return r;
-}
-
-v2 v2skl(v2 x, float n)
-{
-    v2 r = {{x.f[0] * n, x.f[1] * n}};
-    return r;
-}
-
-v2 v2dir2(v2 src, v2 dest)
-{
-    v2 r = v2norm(v2sub(dest, src));
-    return r;
-}
-
-v2 v2norm(v2 x)
-{
-    float len2 = v2len2(x);
-    v2 r = x;
-    if (len2 > 0)
-        r = v2skl(r, Q_rsqrt(len2));
-    return r;
-}
-
-float v2dot(v2 x1, v2 x2)
-{
-    float r = (x1.f[0] * x2.f[0]) + (x1.f[1] * x2.f[1]);
-    return r;
-}
-
-float v2len2(v2 x)
-{
-    float r = sqr(x.f[0]) + sqr(x.f[1]);
-    return r;
-}
-
-float v2dist2(v2 src, v2 dest)
-{
-    float r = sqr(src.f[0] - dest.f[0]) + sqr(src.f[1] - dest.f[1]);
-    return r;
-}
-
-int cchit(v2 c1, v2 c2, float r1, float r2)
-{
-    float d2 = v2dist2(c1, c2);
-    int r = sqr(r1 + r2) >= d2;
-    return r;
-}
-
-int cphit(v2 c, float r, v2 p)
-{
-    float d2 = v2dist2(c, p);
-    int result = d2 < sqr(r);
-    return result;
-}
-
-int rphit(v2 r, float w, float h, v2 p)
-{
-    int result = (p.x >= min(r.x, r.x + w) && p.x <= max(r.x, r.x + w) &&
-                  p.y >= min(r.y, r.y + h) && p.y <= max(r.y, r.y + h));
-    return result;
-}
-
-int rrhit(v2 r1, v2 r2, float w1, float h1, float w2, float h2)
-{
-    int xhit = (max(r1.x, r1.x + w1) >= min(r2.x, r2.x + w2) &&
-                min(r1.x, r1.x + w1) <= max(r2.x, r2.x + w2));
-    int yhit = (max(r1.y, r1.y + h1) >= min(r2.y, r2.y + h2) &&
-                min(r1.y, r1.y + h1) <= max(r2.y, r2.y + h2));
-    int r = xhit && yhit;
-    return r;
-}
-
-int strsw(char *src, char *match)
-{
-    if (!src || !match)
-        return 0;
-    while (*match && *src && *src == *match && (src++, match++, 1));
-    int r = *match == 0;
-    return r;
-}
-
-int strew(char *src, char *match)
-{
-    if (!src || !match)
-        return 0;
-    char *srcend = src;
-    char *matchend = match;
-    // find end of src.
-    while (*srcend && (srcend++, 1));
-    // find end of match.
-    while (*matchend && (matchend++, 1));
-    // now check if they match.
-    while (src < srcend && 
-           match < matchend && 
-           *srcend == *matchend && 
-           (srcend--, matchend--, 1));
-    int r = match == matchend && *srcend == *matchend;
-    return r;
-}
-
-int streq(char *a, char *b)
-{
-    if (!a || !b)
-        return 0;
-    while (*a && *b && *a == *b && (a++, b++, 1));
-    int r = *a == 0 && *b == 0;
-    return r;
-}
-
-int streqn(char *a, char *b, usize n)
-{
-    if (!a || !b || n == 0)
-        return 0;
-    while (n > 0 && *a && *b && *a == *b && (a++, b++, n--, 1));
-    int r = n == 0;
-    return r;
-}
-
-usize strl(char *src)
-{
-    if (!src)
-        return 0;
-    usize r = 0;
-    while (*src && (r++, src++, 1));
-    return r;
-}
-
-usize stri64(char *dest, i64 x, u64 base, usize n)
-{
-    if (!dest || !n || !base)
-        return 0;
-    int negative = x < 0;
-    // if zero, make sure we at least have 1 digit.
-    usize r = x ? 0 : 1;
-    x = abs(x);
-    // count digits in number.
-    for (i64 i = x; i; i /= base)
-        r++;
-    // if we can't store the whole number just return.
-    if (r + negative >= n)
-        return 0;
-    // add negative symbol.
-    if (negative)
-        *dest++ = '-';
-    for (usize i = 0; i < r; i++) {
-        i64 rem = x % base;
-        x = x / base;
-        *(dest + r - i - 1) = rem < 10 ? rem + '0' : 'a' + rem - 10;
-    }
-    // null terminator.
-    *(dest + r) = 0;
-    // +1 null terminator.
-    return r + 1 + negative;
-}
-
-usize strdbl(char *dest, double x, usize n)
-{
-    if (!dest || !n)
-        return 0;
-    int negative = x < 0;
-    usize r = 0;
-    x = abs(x);
-    i64 d = (i64)x;
-    i64 dec = (i64)(x * 100) % 100;
-    if (negative)
-        *dest++ = '-';
-    while (r + negative < n && d > 0) {
-        *dest++ = (d % 10) + '0';
-        r++;
-        d /= 10;
-    }
-    // +1 = .
-    // +2 = decimals
-    // +1 = null
-    // +4 total.
-    if (r + 4 + negative >= n) {
-        // if there isn't enough space, roll back what we wrote.
-        for (usize i = 0; i < r + negative; i++)
-            *dest-- = 0;
-        return 0;
-    }
-    for (usize i = 0, m = r / 2; i < m; i++) {
-        char last = *(dest - r + i);
-        *(dest - r + i) = *(dest - (i + 1));
-        *(dest - (i + 1)) = last;
-    }
-    *dest++ = '.';
-    *dest++ = (dec / 10) + '0';
-    *dest++ = (dec % 10) + '0';
-    // null terminator.
-    *dest = 0;
-    return r + 4 + negative;
-}
-
-// djb2 by Dan Bernstein.
-usize strhash(char *src)
-{
-    if (!src)
-        return 0;
-    unsigned long hash = 5381;
-    int c = 0;
-    while ((c = *src++))
-        hash = ((hash << 5) + hash) + c;
-    return hash;
-}
-
-usize strf(char *dest, usize n, char *format, ...)
-{
-    va_list va;
-    va_start(va, format);
-    usize r = vstrf(dest, n, format, va);
-    va_end(va);
-    return r;
-}
-
-usize vstrf(char *dest, usize n, char *format, va_list va)
-{
-    if (!dest || !format)
-        return 0;
-    char *head = dest;
-    // va_list va;
-    // va_start(va, format);
-    while (*format && (dest - head) < n) {
-        int iscommand = *format == '%';
-        if (iscommand && *(format + 1) == '%') {
-            // skip %%.
-            format++;
-            format++;
-            *dest++ = '%';
-            continue;
-        }
-        if (iscommand && *(format + 1) == 'c') {
-            // skip %c.
-            format++;
-            format++;
-            char c = (char)va_arg(va, int);
-            *dest++ = c;
-            continue;
-        }
-        if (iscommand && *(format + 1) == 's') {
-            // skip %s.
-            format++;
-            format++;
-            char *buf = va_arg(va, char *);
-            if (!buf)
-                buf = "(null)";
-            usize len = strl(buf);
-            for (usize i = 0; i < len; i++) {
-                *dest++ = *buf++;
-                if (dest - head >= n)
-                    goto finish;
-            }
-            continue;
-        }
-        if (iscommand && *(format + 1) == '*' && *(format + 2) == 's') {
-            // skip %*s.
-            format++;
-            format++;
-            format++;
-            u32 len = va_arg(va, u32);
-            char *buf = va_arg(va, char *);
-            if (!buf) {
-                len = sizeof("(null)") - 1;
-                buf = "(null)";
-            }
-            for (u32 i = 0; i < len; i++) {
-                *dest++ = *buf++;
-                if (dest - head >= n)
-                    goto finish;
-            }
-            continue;
-        }
-        if (iscommand && *(format + 1) == 'x') {
-            // skip %x.
-            format++;
-            format++;
-            i64 x = (i64)va_arg(va, i32);
-            usize r = stri64(dest, x, 16, n - (dest - head));
-            if (!r)
-                *dest++ = '?';
-            // don't include the null terminator yet.
-            else
-                dest += r - 1;
-            continue;
-        }
-        if (iscommand && *(format + 1) == 'd') {
-            // skip %d.
-            format++;
-            format++;
-            i64 d = (i64)va_arg(va, i32);
-            usize r = stri64(dest, d, 10, n - (dest - head));
-            if (!r)
-                *dest++ = '?';
-            // don't include the null terminator yet.
-            else
-                dest += r - 1;
-            continue;
-        }
-        if (iscommand && *(format + 1) == 'f') {
-            // skip %f.
-            format++;
-            format++;
-            double f = va_arg(va, double);
-            usize r = strdbl(dest, f, n - (dest - head));
-            if (!r)
-                *dest++ = '?';
-            // don't include the null terminator yet.
-            else
-                dest += r - 1;
-            continue;
-        }
-        if (iscommand && *(format + 1) == 'v') {
-            // skip %v.
-            format++;
-            format++;
-            *dest++ = '(';
-            if (dest - head >= n)
-                goto finish;
-            v2 v = va_arg(va, v2);
-            usize d = strdbl(dest, v.f[0], n - (dest - head));
-            if (!d)
-                *dest++ = '?';
-            // don't include the null terminator yet.
-            else
-                dest += d - 1;
-            if (dest - head >= n)
-                goto finish;
-            *dest++ = ':';
-            if (dest - head >= n)
-                goto finish;
-            d = strdbl(dest, v.f[1], n - (dest - head));
-            if (!d)
-                *dest++ = '?';
-            // don't include the null terminator yet.
-            else
-                dest += d - 1;
-            if (dest - head >= n)
-                goto finish;
-            *dest++ = ')';
-            continue;
-        }
-        if (iscommand && *(format + 1) == '?') {
-            // skip %?
-            format++;
-            format++;
-            usize (*f)(char *, void *, usize) = va_arg(va, void *);
-            void *v = va_arg(va, void *);
-            usize written = f(dest, v, n - (dest - head));
-            // expect null terminator but don't include it yet.
-            dest += written - 1;
-            continue;
-        }
-        *dest++ = *format++;
-    }
-    finish:
-    // va_end(va);
-    // null terminator.
-    if ((dest - head) < n)
-        *dest++ = 0;
-    else
-        *(dest - 1) = 0;
-    usize r = dest - head;
-    return r;
-}
-
-int idget(usize *dest, usize *ids, usize n)
-{
-    int result = 0;
-    if (!ids)
-        return result;
-    if (!dest)
-        return result;
-    if (!n)
-        return result;
-    usize id = ids[0];
-    if (id >= n)
-        return 0;
-    if (ids[id]) {
-        *dest = id;
-        ids[0] = ids[id];
-        result = 1;
-    } else {
-        if (id + 1 > n) {
-            result = 0;
-        } else {
-            *dest = id;
-            ids[0] = id + 1;
-            result = 2;
-        }
-    }
-    return result;
-}
-
-void iddone(usize *ids, usize id)
-{
-    if (!ids)
-        return;
-    ids[id] = ids[0];
-    ids[0]  = id;
-}
-
-void mems(void *dest, byte src, usize n)
-{
-    if (!dest)
-        return;
-    byte *bdest = (byte *)dest;
-    for (usize i = 0; i < n; i++)
-        *bdest++ = src;
-}
-
-int memeq(void *a, void *b, usize n)
-{
-    if (!a || !b)
-        return 0;
-    byte *ba = (byte *) a;
-    byte *bb = (byte *) b;
-    for (usize i = 0; i < n; i++) {
-        if (*ba != *bb)
-            return 0;
-        ba++;
-        bb++;
-    }
-    return 1;
-}
-
-void memc(void *dest, void *src, usize n)
-{
-    if (!dest || !src)
-        return;
-    byte *bdest = (byte *) dest;
-    byte *bsrc = (byte *) src;
-    for (usize i = 0; i < n; i++)
-        *bdest++ = *bsrc++;
-}
-
-u32 randi(u32 *seed)
-{
-    static u32 debugseed = -324516438;
-    if (!seed)
-        seed = &debugseed;
-    *seed = (214013 * (*seed) + 2531011);
-    u32 r = (*seed >> 16) & 0x7FFF;
-    return r;
-}
-
-u32 randi2(u32 *seed, u32 lower, u32 upper)
-{
-    lower = min(lower, upper);
-    upper = max(lower, upper);
-    u32 r = (randi(seed) % (upper - lower + 1)) + lower;
-    return r;
-}
-
-#endif
+unsigned int random_int_ex(
+	unsigned int *seed, 
+	unsigned int lower, 
+	unsigned int upper
+);

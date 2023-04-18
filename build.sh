@@ -1,2 +1,2 @@
 #!/bin/bash
-tcc test.c -o test && ./test
+tcc -Wall -Wextra -Werror test.c flib.c -o test && ./test
