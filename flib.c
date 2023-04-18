@@ -118,14 +118,15 @@ int str_starts_with_n(char *src, char *match, unsigned int n)
 {
 	if (!src || !match)
 		return 0;
+	unsigned int checked = 0;
 	while (
-		n > 0 && 
+		checked < n && 
 		*match && 
 		*src && 
 		*src == *match && 
-		(src++, match++, n--, 1)
+		(src++, match++, checked++, 1)
 	);
-	int r = *match == 0 && n == 0;
+	int r = *match == 0 && n <= checked;
 	return r;
 }
 

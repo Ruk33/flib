@@ -1,40 +1,40 @@
 #define array_length(x) \
-	((sizeof(x) / sizeof(*(x))))
+    ((sizeof(x) / sizeof(*(x))))
 
 #define for_each(type, x, arr) \
-	for (type *x = (arr); x < (arr) + array_length(arr); x++)
+    for (type *x = (arr); x < (arr) + array_length(arr); x++)
 
 #define for_each_n(type, x, arr, n) \
-	for (type *x = (arr); x < (arr) + min(array_length(arr), (n)); x++)
+    for (type *x = (arr); x < (arr) + min(array_length(arr), (n)); x++)
 
 #define for_each_reverse(type, x, arr) \
-	for (type *x = (arr) + array_length(arr) - 1; x >= (arr); x--)
+    for (type *x = (arr) + array_length(arr) - 1; x >= (arr); x--)
 
-#define for_each_reverse_n(type, x, arr, n)			\
-	for (											\
-		type *x = (arr) + array_length(arr) - 1;	\
-		x >= (arr) + array_length(arr) - (n);		\
-		x--											\
-	)
+#define for_each_reverse_n(type, x, arr, n)         \
+    for (                                           \
+        type *x = (arr) + array_length(arr) - 1;    \
+        x >= (arr) + array_length(arr) - (n);       \
+        x--                                         \
+    )
 
 #define abs(x) \
-	((x) < 0 ? (-(x)) : (x))
+    ((x) < 0 ? (-(x)) : (x))
 #define min(a, b) \
-	((a) < (b) ? (a) : (b))
+    ((a) < (b) ? (a) : (b))
 #define max(a, b) \
-	((a) > (b) ? (a) : (b))
+    ((a) > (b) ? (a) : (b))
 #define clamp(x, a, b) \
-	(min(max((x), min((a), (b))), max((a), (b))))
+    (min(max((x), min((a), (b))), max((a), (b))))
 #define lerp(x, a, b) \
-	((a) * (1 - (x)) + ((b) * (x)))
+    ((a) * (1 - (x)) + ((b) * (x)))
 #define sqr(x) \
-	((x) * (x))
+    ((x) * (x))
 
-// coroutine/fiber/green-thread
+// coroutine/fiber/green-thread/task
 // example:
-// void mycoroutine(struct coroutine *ctx)
+// void my_coroutine(struct coroutine *ctx)
 // {
-//      coroutine_start(ctx) {
+//      coroutine(ctx) {
 //          // on first call, this will be executed.
 //          // then exit.
 //          yield(1);
@@ -44,13 +44,17 @@
 //          // third call, this chunk will execute, restarting
 //          // the coroutine state to start from the beginning.
 //          reset;
-//      } coroutine_end;
+//      }
 // }
-#define coroutine_start(ctx)				\
-	do {									\
-		struct coroutine *__coro = (ctx);	\
-		switch ((__coro)->state) {			\
-		case 0:
+#define coroutine(ctx)                  \
+    struct coroutine *__coro = (ctx);   \
+    switch (__coro->state)              \
+    case 0:
+
+// aliases for coroutine
+#define task coroutine
+#define fiber coroutine
+#define green_thread coroutine
 
 // yield and update the state of the coroutine.
 // id must be unique.
@@ -58,53 +62,48 @@
 // hot-reload your code. if you do though, you
 // can't since any change can update your line
 // numbers and produce incorrect results.
-#define yield(id)				\
-	do {						\
-		(__coro)->state = (id);	\
-		return;					\
-		case (id):;				\
-	} while (0)
+#define yield(id)               \
+    do {                        \
+        __coro->state = (id);   \
+        return;                 \
+        case (id):;             \
+    } while (0)
 
 // sleep and yield until timeout has past.
 // dt = how much time has past (if you are writing
 //      a game, this would be the delta time of each
 //      frame)
-#define syield(id, _timeout, dt)		\
-	do {								\
-		(__coro)->timeout = (_timeout);	\
-		yield(id);						\
-		(__coro)->timeout -= (dt);		\
-		if ((__coro)->timeout > 0)		\
-			return;						\
-	} while(0)
+#define syield(id, _timeout, dt)        \
+    do {                                \
+        __coro->timeout = (_timeout);   \
+        yield(id);                      \
+        __coro->timeout -= (dt);        \
+        if (__coro->timeout > 0)        \
+            return;                     \
+    } while(0)
 
 // reset the coroutine state to start from the beginning.
-#define reset								\
-	do {									\
-		*(__coro) = (struct coroutine){0};	\
-	} while (0)
-
-// end coroutine block.
-#define coroutine_end	\
-		}				\
-	} while (0)
+#define reset                               \
+    do {                                    \
+        *__coro = (struct coroutine){0};    \
+    } while (0)
 
 // str format using fixed array as destination.
 #define strf_ex(dest, format, ...) \
-	(strf((dest), sizeof(dest), (format), __VA_ARGS__))
+    (strf((dest), sizeof(dest), (format), __VA_ARGS__))
 
 #define id_get_ex(dest, ids) \
-	(id_get((dest), (ids), array_length(ids)))
+    (id_get((dest), (ids), array_length(ids)))
 
 typedef union v2 {
-	struct { float x, y; };
-	struct { float w, h; };
-	float f[2];
+    struct { float x, y; };
+    struct { float w, h; };
+    float f[2];
 } v2;
 
 struct coroutine {
-	unsigned int state;
-	float timeout;
+    unsigned int state;
+    float timeout;
 };
 
 // fast inverse square root.
@@ -204,7 +203,7 @@ unsigned int random_int(unsigned int *seed);
 // random integer between lower and upper.
 // seed can be null.
 unsigned int random_int_ex(
-	unsigned int *seed, 
-	unsigned int lower, 
-	unsigned int upper
+    unsigned int *seed, 
+    unsigned int lower, 
+    unsigned int upper
 );
