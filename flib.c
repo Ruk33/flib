@@ -126,7 +126,7 @@ int str_starts_with_n(char *src, char *match, unsigned int n)
 		*src == *match && 
 		(src++, match++, checked++, 1)
 	);
-	int r = *match == 0 && n <= checked;
+	int r = n == checked;
 	return r;
 }
 
@@ -162,14 +162,15 @@ int str_ends_with_n(char *src, char *match, unsigned int n)
 	// find end of match.
 	while (*match_end && (match_end++, 1));
 	// now check if they match.
+	unsigned int checked = 0;
 	while (
-		n > 0 &&
+		checked < n &&
 		src < src_end && 
 		match < match_end && 
 		*src_end == *match_end && 
-		(src_end--, match_end--, n--, 1)
+		(src_end--, match_end--, checked++, 1)
 	);
-	int r = match == match_end && *src_end == *match_end && n == 0;
+	int r = *src_end == *match_end && n == checked;
 	return r;
 }
 

@@ -111,6 +111,7 @@ int main(void)
         assert(!str_starts_with("something", "soma"));
         assert(!str_starts_with("something", "soam"));
         assert(str_starts_with_n("something", "somlorem", 3));
+        assert(!str_starts_with_n("something", "somlorem", 4));
     }
     {
         assert(str_ends_with("something", ""));
@@ -118,6 +119,8 @@ int main(void)
         assert(!str_ends_with("something", "ahing"));
         assert(!str_ends_with("something", "hiang"));
         assert(!str_ends_with("hing", "shing"));
+        assert(str_ends_with_n("hing", "sing", 3));
+        assert(!str_ends_with_n("aing", "sing", 4));
     }
     {
         assert(str_equals("something", "something"));
