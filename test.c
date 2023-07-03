@@ -10,12 +10,14 @@ void test_coroutine(struct coroutine *coro)
         printf("this is the second state.\n");
         yield(2);
         printf("this is the third state.\n");
-        syield(
-            3, 
-            15, // how many seconds to sleep
-            10  // how many seconds have past (if you are writing a game, 
-                // this would be the time delta between each frame)
-        );
+        syield(3,
+               
+               // how many seconds to sleep.
+               15,
+               
+               // how many seconds have past (if you are writing a game,
+               // this would be the delta time between each frame)
+               10);
         printf("sleep done!\n");
         reset;
     }
@@ -161,6 +163,21 @@ int main(void)
         assert(str_equals(b, ".00"));
     }
     {
+        assert(str_parse_int("42") == 42);
+        assert(str_parse_int("-42") == -42);
+        assert(str_parse_int("     42") == 42);
+        assert(str_parse_int("+1") == 1);
+        assert(str_parse_int(0) == 0);
+    }
+    {
+        assert(str_parse_double("42.42") - 42.42 <= 0.0001);
+        assert(str_parse_double("-42.42") + 42.42 <= 0.0001);
+        assert(str_parse_double("+42.42") - 42.42 <= 0.0001);
+        assert(str_parse_double("        42.42") - 42.42 <= 0.0001);
+        assert(str_parse_double("42") - 42 <= 0.01);
+        assert(str_parse_double("42.") - 42.0 <= 0.0001);
+    }
+    {
         char *b1 = "this is a test";
         char b2[]= "this is a test";
         assert(str_hash(b1) == str_hash(b2));
@@ -169,18 +186,16 @@ int main(void)
     }
     {
         char b[256] = {0};
-        unsigned int n = strf_ex(
-            b, 
-            "%s %d %v %f %x %*s %c sample.\n", 
-            "test", 
-            32, 
-            (v2){{2.25, 33.45}}, 
-            23.45, 
-            0xfafa, 
-            2, 
-            "lorem", 
-            'a'
-        );
+        unsigned int n = strf_ex(b, 
+                                 "%s %d %v %f %x %*s %c sample.\n", 
+                                 "test", 
+                                 32, 
+                                 (v2){{2.25, 33.45}}, 
+                                 23.45, 
+                                 0xfafa, 
+                                 2, 
+                                 "lorem", 
+                                 'a');
         assert(str_equals(b, "test 32 (2.25:33.45) 23.45 fafa lo a sample.\n"));
         assert(n == sizeof("test 32 (2.25:33.45) 23.45 fafa lo a sample.\n"));
         // strf adds a null terminator.
@@ -189,9 +204,9 @@ int main(void)
         
         int x = 30;
         n = strf_ex(b,
-                  "%? my custom formatter.",
-                  custom_formatter,
-                  &x);
+                    "%? my custom formatter.",
+                    custom_formatter,
+                    &x);
         assert(str_equals(b, "3 my custom formatter."));
     }
     {

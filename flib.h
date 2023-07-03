@@ -1,34 +1,30 @@
 #define array_length(x) \
-    ((sizeof(x) / sizeof(*(x))))
+((sizeof(x) / sizeof(*(x))))
 
 #define for_each(type, x, arr) \
-    for (type *x = (arr); x < (arr) + array_length(arr); x++)
+for (type *x = (arr); x < (arr) + array_length(arr); x++)
 
 #define for_each_n(type, x, arr, n) \
-    for (type *x = (arr); x < (arr) + min(array_length(arr), (n)); x++)
+for (type *x = (arr); x < (arr) + min(array_length(arr), (n)); x++)
 
 #define for_each_reverse(type, x, arr) \
-    for (type *x = (arr) + array_length(arr) - 1; x >= (arr); x--)
+for (type *x = (arr) + array_length(arr) - 1; x >= (arr); x--)
 
-#define for_each_reverse_n(type, x, arr, n)         \
-    for (                                           \
-        type *x = (arr) + array_length(arr) - 1;    \
-        x >= (arr) + array_length(arr) - (n);       \
-        x--                                         \
-    )
+#define for_each_reverse_n(type, x, arr, n) \
+for (type *x = (arr) + array_length(arr) - 1; x >= (arr) + array_length(arr) - (n); x--)
 
 #define abs(x) \
-    ((x) < 0 ? (-(x)) : (x))
+((x) < 0 ? (-(x)) : (x))
 #define min(a, b) \
-    ((a) < (b) ? (a) : (b))
+((a) < (b) ? (a) : (b))
 #define max(a, b) \
-    ((a) > (b) ? (a) : (b))
+((a) > (b) ? (a) : (b))
 #define clamp(x, a, b) \
-    (min(max((x), min((a), (b))), max((a), (b))))
+(min(max((x), min((a), (b))), max((a), (b))))
 #define lerp(x, a, b) \
-    ((a) * (1 - (x)) + ((b) * (x)))
+((a) * (1 - (x)) + ((b) * (x)))
 #define sqr(x) \
-    ((x) * (x))
+((x) * (x))
 
 // coroutine/fiber/green-thread/task
 // example:
@@ -46,10 +42,10 @@
 //          reset;
 //      }
 // }
-#define coroutine(ctx)                  \
-    struct coroutine *__coro = (ctx);   \
-    switch (__coro->state)              \
-    case 0:
+#define coroutine(ctx) \
+struct coroutine *__coro = (ctx); \
+switch (__coro->state) \
+case 0:
 
 // aliases for coroutine
 #define task coroutine
@@ -62,38 +58,38 @@
 // hot-reload your code. if you do though, you
 // can't since any change can update your line
 // numbers and produce incorrect results.
-#define yield(id)               \
-    do {                        \
-        __coro->state = (id);   \
-        return;                 \
-        case (id):;             \
-    } while (0)
+#define yield(id) \
+do { \
+__coro->state = (id); \
+return; \
+case (id):; \
+} while (0)
 
 // sleep and yield until timeout has past.
 // dt = how much time has past (if you are writing
 //      a game, this would be the delta time of each
 //      frame)
-#define syield(id, _timeout, dt)        \
-    do {                                \
-        __coro->timeout = (_timeout);   \
-        yield(id);                      \
-        __coro->timeout -= (dt);        \
-        if (__coro->timeout > 0)        \
-            return;                     \
-    } while(0)
+#define syield(id, _timeout, dt) \
+do { \
+__coro->timeout = (_timeout); \
+yield(id); \
+__coro->timeout -= (dt); \
+if (__coro->timeout > 0) \
+return; \
+} while(0)
 
 // reset the coroutine state to start from the beginning.
-#define reset                               \
-    do {                                    \
-        *__coro = (struct coroutine){0};    \
-    } while (0)
+#define reset \
+do { \
+*__coro = (struct coroutine){0}; \
+} while (0)
 
 // str format using fixed array as destination.
 #define strf_ex(dest, format, ...) \
-    (strf((dest), sizeof(dest), (format), __VA_ARGS__))
+(strf((dest), sizeof(dest), (format), __VA_ARGS__))
 
 #define id_get_ex(dest, ids) \
-    (id_get((dest), (ids), array_length(ids)))
+(id_get((dest), (ids), array_length(ids)))
 
 typedef union v2 {
     struct { float x, y; };
@@ -158,6 +154,8 @@ unsigned int str_int(char *dest, int x, unsigned int base, unsigned int n);
 // dest will be null terminated.
 // the amount of characters written is returned (including null terminator)
 unsigned int str_double(char *dest, double x, unsigned int n);
+int str_parse_int(char *src);
+double str_parse_double(char *src);
 // build a hash from a string.
 unsigned int str_hash(char *src);
 // write up to n bytes of formatted string into dest.
@@ -202,8 +200,4 @@ void id_recycle(unsigned int *ids, unsigned int id);
 unsigned int random_int(unsigned int *seed);
 // random integer between lower and upper.
 // seed can be null.
-unsigned int random_int_ex(
-    unsigned int *seed, 
-    unsigned int lower, 
-    unsigned int upper
-);
+unsigned int random_int_ex(unsigned int *seed, unsigned int lower, unsigned int upper);

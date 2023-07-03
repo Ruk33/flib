@@ -79,23 +79,17 @@ int cp_hit(v2 c, float r, v2 p)
 
 int rp_hit(v2 r, float w, float h, v2 p)
 {
-	int result = (
-		p.x >= min(r.x, r.x + w) && p.x <= max(r.x, r.x + w) &&
-		p.y >= min(r.y, r.y + h) && p.y <= max(r.y, r.y + h)
-	);
+	int result = (p.x >= min(r.x, r.x + w) && p.x <= max(r.x, r.x + w) &&
+                  p.y >= min(r.y, r.y + h) && p.y <= max(r.y, r.y + h));
 	return result;
 }
 
 int rr_hit(v2 r1, v2 r2, float w1, float h1, float w2, float h2)
 {
-	int xhit = (
-		max(r1.x, r1.x + w1) >= min(r2.x, r2.x + w2) &&
-		min(r1.x, r1.x + w1) <= max(r2.x, r2.x + w2)
-	);
-	int yhit = (
-		max(r1.y, r1.y + h1) >= min(r2.y, r2.y + h2) &&
-		min(r1.y, r1.y + h1) <= max(r2.y, r2.y + h2)
-	);
+	int xhit = (max(r1.x, r1.x + w1) >= min(r2.x, r2.x + w2) &&
+                min(r1.x, r1.x + w1) <= max(r2.x, r2.x + w2));
+	int yhit = (max(r1.y, r1.y + h1) >= min(r2.y, r2.y + h2) &&
+                min(r1.y, r1.y + h1) <= max(r2.y, r2.y + h2));
 	int r = xhit && yhit;
 	return r;
 }
@@ -104,12 +98,10 @@ int str_starts_with(char *src, char *match)
 {
 	if (!src || !match)
 		return 0;
-	while (
-		*match && 
-		*src && 
-		*src == *match && 
-		(src++, match++, 1)
-	);
+	while (*match && 
+           *src && 
+           *src == *match && 
+           (src++, match++, 1));
 	int r = *match == 0;
 	return r;
 }
@@ -119,13 +111,11 @@ int str_starts_with_n(char *src, char *match, unsigned int n)
 	if (!src || !match)
 		return 0;
 	unsigned int checked = 0;
-	while (
-		checked < n && 
-		*match && 
-		*src && 
-		*src == *match && 
-		(src++, match++, checked++, 1)
-	);
+	while (checked < n && 
+           *match && 
+           *src && 
+           *src == *match && 
+           (src++, match++, checked++, 1));
 	int r = n == checked;
 	return r;
 }
@@ -141,12 +131,10 @@ int str_ends_with(char *src, char *match)
 	// find end of match.
 	while (*match_end && (match_end++, 1));
 	// now check if they match.
-	while (
-		src < src_end && 
-		match < match_end && 
-		*src_end == *match_end && 
-		(src_end--, match_end--, 1)
-	);
+	while (src < src_end && 
+           match < match_end && 
+           *src_end == *match_end && 
+           (src_end--, match_end--, 1));
 	int r = match == match_end && *src_end == *match_end;
 	return r;
 }
@@ -163,13 +151,11 @@ int str_ends_with_n(char *src, char *match, unsigned int n)
 	while (*match_end && (match_end++, 1));
 	// now check if they match.
 	unsigned int checked = 0;
-	while (
-		checked < n &&
-		src < src_end && 
-		match < match_end && 
-		*src_end == *match_end && 
-		(src_end--, match_end--, checked++, 1)
-	);
+	while (checked < n &&
+           src < src_end && 
+           match < match_end && 
+           *src_end == *match_end && 
+           (src_end--, match_end--, checked++, 1));
 	int r = *src_end == *match_end && n == checked;
 	return r;
 }
@@ -266,6 +252,58 @@ unsigned int str_double(char *dest, double x, unsigned int n)
 	// null terminator.
 	*dest = 0;
 	return r + 4 + negative;
+}
+
+int str_parse_int(char *src)
+{
+    if (!src)
+        return 0;
+    int result = 0;
+    int sign = 1;
+    // get rid of white space.
+    while (*src == ' ')
+        src++;
+    // check sign.
+    if (*src == '-' || *src == '+') {
+        sign = (*src == '-') ? -1 : 1;
+        src++;
+    }
+    while (*src >= '0' && *src <= '9') {
+        result = result * 10 + (*src - '0');
+        src++;
+    }
+    result = result * sign;
+    return result;
+}
+
+double str_parse_double(char *src) {
+    if (!src)
+        return 0.0;
+    double result = 0.0;
+    double sign = 1.0;
+    double fraction = 1.0;
+    // get rid of white space.
+    while (*src == ' ')
+        src++;
+    // check sign.
+    if (*src == '-' || *src == '+') {
+        sign = (*src == '-') ? -1.0 : 1.0;
+        src++;
+    }
+    while (*src >= '0' && *src <= '9') {
+        result = result * 10.0 + (*src - '0');
+        src++;
+    }
+    if (*src == '.') {
+        src++;
+        while (*src >= '0' && *src <= '9') {
+            result = result * 10.0 + (*src - '0');
+            fraction *= 10.0;
+            src++;
+        }
+    }
+    result = sign * result / fraction;
+    return result;
 }
 
 // djb2 by Dan Bernstein.
@@ -485,11 +523,7 @@ unsigned int random_int(unsigned int *seed)
 	return r;
 }
 
-unsigned int random_int_ex(
-	unsigned int *seed, 
-	unsigned int lower, 
-	unsigned int upper
-)
+unsigned int random_int_ex(unsigned int *seed, unsigned int lower, unsigned int upper)
 {
 	lower = min(lower, upper);
 	upper = max(lower, upper);
