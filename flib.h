@@ -176,16 +176,23 @@ unsigned int str_hash(char *src);
 //       your function returns the proper amount of bytes written, 
 //       INCLUDING the null terminator.
 //       example: strf(dest, n, "%?", custom_func, pointer_to_val);
-//       usize custom_func(char *dest, void *v, usize n)
+//       unsigned int custom_func(char *dest, void *v, usize n)
 //       {
 //           // write to dest and return how many bytes were written.
-//           usize written = ...
+//           unsigned int written = ...
 //           return written;
 //       }
 unsigned int strf(char *dest, unsigned int n, char *format, ...);
 unsigned int vstrf(char *dest, unsigned int n, char *format, va_list va);
 
 // get a reusable id from ids without exceeding n ids.
+// example, if you have a list of ids like [1, 2, 3]
+// the first time you call this function, you will get 1.
+// the second time 2. now let's say you are done with number 1.
+// this id (1) will get recycled with id_recycle. when you
+// call id_get again, you won't get 3, but instead, you
+// will get 1, since this id got recycled and it's ready to be used again.
+// if you call the function again, now you will get 3.
 // 0 = error: no more space left; dest is null or ids is null.
 // 1 = success, using recycled id.
 // 2 = success, using new id.
