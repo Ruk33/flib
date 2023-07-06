@@ -8,7 +8,7 @@ float q_rsqrt(float number)
 		unsigned int i;
 	} conv = { .f = number };
 	conv.i  = 0x5f3759df - (conv.i >> 1);
-	conv.f *= 1.5F - (number * 0.5F * conv.f * conv.f);
+	conv.f *= 1.5f - (number * 0.5f * conv.f * conv.f);
 	return conv.f;
 }
 
@@ -254,8 +254,9 @@ unsigned int str_double(char *dest, double x, unsigned int n)
 	return r + 4 + negative;
 }
 
-int str_parse_int(char *src)
+unsigned int str_parse_int(int *dest, char *src)
 {
+    char *head = src;
     if (!src)
         return 0;
     int result = 0;
@@ -273,12 +274,16 @@ int str_parse_int(char *src)
         src++;
     }
     result = result * sign;
-    return result;
+    if (dest)
+        *dest = result;
+    unsigned int bytes_parsed = src - head;
+    return bytes_parsed;
 }
 
-double str_parse_double(char *src) {
+unsigned int str_parse_double(double *dest, char *src) {
+    char *head = src;
     if (!src)
-        return 0.0;
+        return 0;
     double result = 0.0;
     double sign = 1.0;
     double fraction = 1.0;
@@ -303,7 +308,10 @@ double str_parse_double(char *src) {
         }
     }
     result = sign * result / fraction;
-    return result;
+    if (dest)
+        *dest = result;
+    unsigned int bytes_parsed = src - head;
+    return bytes_parsed;
 }
 
 // djb2 by Dan Bernstein.
@@ -475,6 +483,86 @@ unsigned int vstrf(char *dest, unsigned int n, char *format, va_list va)
 		*(dest - 1) = 0;
 	unsigned int r = dest - head;
 	return r;
+}
+
+unsigned int str_scan(char *src, char *pattern, ...)
+{
+	va_list va;
+	va_start(va, pattern);
+	unsigned int bytes_parsed = vstr_scan(src, pattern, va);
+	va_end(va);
+	return bytes_parsed;
+}
+
+unsigned int vstr_scan(char *src, char *pattern, va_list va)
+{
+    char *head = src;
+    if (!src || !pattern)
+        return 0;
+    while (*src && *pattern) {
+        int is_command = *pattern == '%';
+        if (!is_command) {
+            // exit when the pattern is no longer matched.
+            if (*src != *pattern)
+                break;
+            pattern++;
+            src++;
+            continue;
+        }
+        // parse int.
+        if (*(pattern + 1) == 'd') {
+            int *dest = va_arg(va, int *);
+            src += str_parse_int(dest, src);
+            // advance %d.
+            pattern++;
+            pattern++;
+            continue;
+        }
+        // parse double.
+        if (*(pattern + 1) == 'f') {
+            double *dest = va_arg(va, double *);
+            src += str_parse_double(dest, src);
+            // advance %f.
+            pattern++;
+            pattern++;
+            continue;
+        }
+        // parse string
+        if (*(pattern + 1) == '*' && *(pattern + 2) == 's') {
+            // advance %*s
+            pattern++;
+            pattern++;
+            pattern++;
+            unsigned int i = 0;
+            unsigned int n = va_arg(va, unsigned int);
+            char *dest = va_arg(va, char *);
+            while (*src && 
+                   *src != ' ' &&
+                   *src != '\t' &&
+                   // +1, make sure the is room for null termiantor.
+                   i+1 < n) {
+                *dest++ = *src++;
+                i++;
+            }
+            // make sure the entire string
+            // is consumed even if dest
+            // isn't big enough to hold it.
+            while (*src && 
+                   *src != ' ' &&
+                   *src != '\t')
+                src++;
+            // null terminator.
+            *dest = 0;
+            continue;
+        }
+        // break when the pattern is no longer matched.
+        if (*src != *pattern)
+            break;
+        pattern++;
+        src++;
+    }
+    unsigned int bytes_parsed = src - head;
+    return bytes_parsed;
 }
 
 int id_get(unsigned int *dest, unsigned int *ids, unsigned int n)

@@ -163,19 +163,42 @@ int main(void)
         assert(str_equals(b, ".00"));
     }
     {
-        assert(str_parse_int("42") == 42);
-        assert(str_parse_int("-42") == -42);
-        assert(str_parse_int("     42") == 42);
-        assert(str_parse_int("+1") == 1);
-        assert(str_parse_int(0) == 0);
+        int r = 0;
+        
+        assert(str_parse_int(&r, "42") == 2);
+        assert(r == 42);
+        
+        assert(str_parse_int(&r, "-42") == 3);
+        assert(r == -42);
+        
+        assert(str_parse_int(&r, "      42") == 8);
+        assert(r == 42);
+        
+        assert(str_parse_int(&r, "+1") == 2);
+        assert(r == 1);
+        
+        assert(str_parse_int(&r, 0) == 0);
+        assert(str_parse_int(0, "222") == 3);
     }
     {
-        assert(str_parse_double("42.42") - 42.42 <= 0.0001);
-        assert(str_parse_double("-42.42") + 42.42 <= 0.0001);
-        assert(str_parse_double("+42.42") - 42.42 <= 0.0001);
-        assert(str_parse_double("        42.42") - 42.42 <= 0.0001);
-        assert(str_parse_double("42") - 42 <= 0.01);
-        assert(str_parse_double("42.") - 42.0 <= 0.0001);
+        double r = 0;
+        
+        assert(str_parse_double(&r, "42.42") == 5);
+        assert(r - 42.42 <= 0.0001);
+        
+        assert(str_parse_double(&r, "-42.42") == 6);
+        assert(r + 42.42 <= 0.0001);
+        
+        assert(str_parse_double(&r, "+42.42") == 6);
+        assert(r - 42.42 <= 0.0001);
+        
+        assert(str_parse_double(&r, "    +42.42") == 10);
+        assert(r - 42.42 <= 0.0001);
+        
+        assert(str_parse_double(&r, "42") == 2);
+        assert(r - 42.42 <= 0.0001);
+        assert(str_parse_double(&r, "42.") == 3);
+        assert(r - 42.42 <= 0.0001);
     }
     {
         char *b1 = "this is a test";
@@ -208,6 +231,24 @@ int main(void)
                     custom_formatter,
                     &x);
         assert(str_equals(b, "3 my custom formatter."));
+    }
+    {
+        int r = 0;
+        str_scan("number is 42, ok!", "number is %d, ok!", &r);
+        assert(r == 42);
+        
+        double d = 0;
+        str_scan("number is 42.34567, ok!", "number is %f, ok!", &d);
+        assert(d - 42.34567 <= 0.001);
+        
+        char ipsum[32] = {0};
+        str_scan("lorem ipsum dolor sit amet", "lorem %*s dolor sit amet", sizeof(ipsum), ipsum);
+        assert(str_equals(ipsum, "ipsum"));
+        
+        char dolor[32] = {0};
+        str_scan("lorem ipsum dolor sit amet", "lorem %*s %*s sit amet", sizeof(ipsum), ipsum, sizeof(dolor), dolor);
+        assert(str_equals(ipsum, "ipsum"));
+        assert(str_equals(dolor, "dolor"));
     }
     {
         unsigned int id = 0;

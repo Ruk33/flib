@@ -1,3 +1,10 @@
+// sometimes i get tired of writing "unsigned"...
+typedef unsigned char byte;
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long long ulong;
+
 #define array_length(x) \
 ((sizeof(x) / sizeof(*(x))))
 
@@ -12,6 +19,8 @@ for (type *x = (arr) + array_length(arr) - 1; x >= (arr); x--)
 
 #define for_each_reverse_n(type, x, arr, n) \
 for (type *x = (arr) + array_length(arr) - 1; x >= (arr) + array_length(arr) - (n); x--)
+
+#define nl "\n"
 
 #define abs(x) \
 ((x) < 0 ? (-(x)) : (x))
@@ -46,11 +55,6 @@ for (type *x = (arr) + array_length(arr) - 1; x >= (arr) + array_length(arr) - (
 struct coroutine *__coro = (ctx); \
 switch (__coro->state) \
 case 0:
-
-// aliases for coroutine
-#define task coroutine
-#define fiber coroutine
-#define green_thread coroutine
 
 // yield and update the state of the coroutine.
 // id must be unique.
@@ -154,13 +158,17 @@ unsigned int str_int(char *dest, int x, unsigned int base, unsigned int n);
 // dest will be null terminated.
 // the amount of characters written is returned (including null terminator)
 unsigned int str_double(char *dest, double x, unsigned int n);
-int str_parse_int(char *src);
-double str_parse_double(char *src);
+// parse int from src and store it in dest.
+// dest can be null.
+// returns the number of bytes scanned.
+unsigned int str_parse_int(int *dest, char *src);
+unsigned int str_parse_double(double *dest, char *src);
 // build a hash from a string.
 unsigned int str_hash(char *src);
 // write up to n bytes of formatted string into dest.
 // dest will be null terminated.
 // returns number of bytes used/written (INCLUDING null terminator)
+//
 // formats:
 // %%  = escapes % and only writes one %.
 // %c  = writes character.
@@ -184,6 +192,31 @@ unsigned int str_hash(char *src);
 //       }
 unsigned int strf(char *dest, unsigned int n, char *format, ...);
 unsigned int vstrf(char *dest, unsigned int n, char *format, va_list va);
+
+// scan string from src using the pattern from pattern
+// if the string doesn't conform to the pattern,
+// the function will return at the first mismatch.
+//
+// formats:
+// %d  = reads integer
+// %f  = reads double
+// %*s = reads up to n bytes of string or first space or tab
+//       if the entire string can't be read/stored
+//       into the buffer, what can be stored will be stored
+//       and the rest is discarded. the string is guaranteed
+//       to be null terminated.
+// 
+// example: 
+// int i = 0;
+// double d = 0;
+// char str[4] = {0};
+// str_scan("int is 42, double is 42.5, str is randomstring", "int is %d, double is %f, str is %*s", &i, &d, (uint) sizeof(str), str);
+// 
+// after this call, i will be 42, d will be 42.5, and str will be "ran" (notice the last byte was used for the null terminator)
+//
+// returns how many bytes were parsed/scanned from src.
+unsigned int vstr_scan(char *src, char *pattern, va_list va);
+unsigned int str_scan(char *src, char *pattern, ...);
 
 // get a reusable id from ids without exceeding n ids.
 // example, if you have a list of ids like [1, 2, 3]
