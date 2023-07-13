@@ -3,7 +3,6 @@ typedef unsigned char byte;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
-typedef unsigned long long ulong;
 
 #define array_length(x) \
 ((sizeof(x) / sizeof(*(x))))
