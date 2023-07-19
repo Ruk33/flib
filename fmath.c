@@ -3091,54 +3091,60 @@ double sqrt(double x)
 
 double fmod(double dividend, double divisor)
 {
+#if 0
     double quotient = dividend / divisor;
     double integer = (double)(long long) quotient;
     double remainder = dividend - integer * divisor;
     return remainder;
+#else
+    double result;
+    __asm__ (
+             "fldl %1;   \n\t"  // load divisor into st(0)
+             "fldl %2;   \n\t"  // load dividend into st(1)
+             "fprem;     \n\t"  // compute dividend % divisor
+             "fstpl %0;  \n\t"  // store result in output variable
+             : "=m" (result)    // output
+             : "m" (divisor), "m" (dividend) // inputs
+             : "cc", "memory"  // clobbered registers
+             );
+    return result;
+#endif
 }
 
 double atan2(double y, double x)
 {
     // Calculate the normalized coordinates in the range [-1, 1]
     // double x_norm = x / sqrt(x * x + y * y);
-    // double y_norm = y / sqrt(x * x + y * y);
     double x_norm = x * q_rsqrt(x * x + y * y);
-    double y_norm = y * q_rsqrt(x * x + y * y);
     
-    // Calculate the lookup table index
     // int index = (int)((x_norm + 1.0) / 2.0 * array_length(atan2_lut));
     int index = (int)((x_norm + 1.0) * 0.5 * array_length(atan2_lut));
     
-    // Lookup the atan2 value from the table
     return atan2_lut[index];
 }
 
 double cos(double angle)
 {
-    // Normalize the angle to the lookup table range
+    // normalize the angle to the lookup table range
     angle = fmod(angle, pi2);
     if (angle < 0.0)
         angle += pi2;
     
-    // Calculate the lookup table index
     int index = (int)(angle * pi2_inv * array_length(cos_lut));
     // int index = (int)(angle / (pi2) * array_length(cos_lut));
     
-    // Lookup the cosine value from the table
     return cos_lut[index];
 }
 
 double sin(double angle)
 {
-    // Normalize the angle to the lookup table range
+    // normalize the angle to the lookup table range
     angle = fmod(angle, pi2);
     if (angle < 0.0)
         angle += pi2;
     
-    // Calculate the lookup table index
     int index = (int)(angle * pi2_inv * array_length(sin_lut));
     // int index = (int)(angle / (pi2) * array_length(sin_lut));
     
-    // Lookup the sine value from the table
     return sin_lut[index];
 }
