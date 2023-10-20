@@ -1,3 +1,5 @@
+#include <stdarg.h> // va_args
+
 // sometimes i get tired of writing "unsigned"...
 typedef unsigned char byte;
 typedef unsigned char uchar;
@@ -18,6 +20,40 @@ for (type *x = (arr) + array_length(arr) - 1; x >= (arr); x--)
 
 #define for_each_reverse_n(type, x, arr, n) \
 for (type *x = (arr) + array_length(arr) - 1; x >= (arr) + array_length(arr) - (n); x--)
+
+// profile a block of code
+// BEFORE the block gets executed, the function unsigned long long profile_start(const char *name)
+// will be called. this function should return a timer or a number that later can
+// be used to tell how much the block of code took to execute.
+// AFTER the block gets executed, the function profile_end(const char *name, unsigned long long diff)
+// will be called. this function receives the name of the block plus the start number
+// returned by profile_start.
+// example:
+// unsigned long long profile_start(const char *name)
+// {
+//     return time(0);
+// }
+// void profile_end(const char *name, unsigned long long start_time)
+// {
+//     printf("block of code %s took %ld seconds to run.\n", name, time(0) - start_time);
+// }
+// int main(void)
+// {
+//     profile("some name") some_expensive_operation();
+//     profile("some other name") {
+//         some_expensive_operation();
+//         some_expensive_operation();
+//         break; // don't return, otherwise profile_end won't be called.
+//         some_expensive_operation();
+//     }
+//     return 0;
+// }
+#define profile(name) \
+for (unsigned long long _start = profile_start(name), _run_parent = 1; _run_parent; (profile_end(name, _start), _run_parent = 0)) \
+for (int _run_child = 1; _run_child; _run_child = 0)
+
+#define profilef \
+profile(__FUNCTION__)
 
 #define nl "\n"
 

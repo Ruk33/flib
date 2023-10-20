@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <time.h>
 #include "flib.h"
 
 void test_coroutine(struct coroutine *coro)
@@ -29,6 +30,17 @@ unsigned int custom_formatter(char *dest, void *v, unsigned int n)
     x /= 10;
     unsigned int written = str_int(dest, x, 10, n);
     return written;
+}
+
+unsigned long long profile_start(const char *name)
+{
+    printf("profiling %s" nl, name);
+    return time(0);
+}
+
+void profile_end(const char *name, unsigned long long start_time)
+{
+    printf("block %s took %d seconds" nl, name, time(0) - start_time);
 }
 
 int main(void)
@@ -298,6 +310,12 @@ int main(void)
         test_coroutine(&coro);
         test_coroutine(&coro);
         test_coroutine(&coro);
+    }
+    {
+        profile("some block") {
+            printf("run expensive operation here." nl);
+            for (unsigned long long i = 0; i < 3000000000; i++);
+        }
     }
     
     printf("all good!\n");
