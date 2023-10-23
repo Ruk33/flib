@@ -5,21 +5,59 @@ typedef unsigned char byte;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
+typedef unsigned long long ull;
+typedef unsigned long long ullong;
 
 #define array_length(x) \
 ((sizeof(x) / sizeof(*(x))))
 
+#define countof(x) \
+array_length(x)
+
+// iterate through an array
+// example:
+// int r[] = {1, 2, 3, 4};
+// for_each(int, x, r)
+//     printf("value %d in index %d\n", *x, index);
 #define for_each(type, x, arr) \
 for (type *x = (arr); x < (arr) + array_length(arr); x++)
 
+// iterate through an array up to n elements.
 #define for_each_n(type, x, arr, n) \
 for (type *x = (arr); x < (arr) + min(array_length(arr), (n)); x++)
 
+// iterate through an array in reverse order.
 #define for_each_reverse(type, x, arr) \
 for (type *x = (arr) + array_length(arr) - 1; x >= (arr); x--)
 
+// iterate through an array in reverse order up to n elements.
 #define for_each_reverse_n(type, x, arr, n) \
 for (type *x = (arr) + array_length(arr) - 1; x >= (arr) + array_length(arr) - (n); x--)
+
+// alternative version for for_each. you can use
+// index to know what index you currently are.
+// example:
+// int r[] = {1, 2, 3, 4};
+// each(int *x, r)
+//     printf("value %d in index %d\n", *x, index);
+#define each(item, array) \
+for (unsigned long long keep = 1, index = 0; keep && index < countof(array); keep = !keep, index++) \
+for(item = (array) + index; keep; keep = !keep)
+
+// iterate array up to max elements.
+#define eachn(item, array, max) \
+for (unsigned long long keep = 1, index = 0; keep && index < (max); keep = !keep, index++) \
+for(item = (array) + index; keep; keep = !keep)
+
+// same as for_each_reverse. iterate through an array in reverse order.
+#define rev(item, array) \
+for (unsigned long long keep = 1, index = countof(array) - 1; keep && (long long) index != -1; keep = !keep, index--) \
+for(item = (array) + index; keep; keep = !keep)
+
+// iterate array in reverse order up to max elements.
+#define revn(item, array, max) \
+for (unsigned long long keep = 1, index = countof(array) - 1, max2 = (max); keep && max2 != 0; keep = !keep, index--, max2--) \
+for(item = (array) + index; keep; keep = !keep)
 
 // profile a block of code
 // BEFORE the block gets executed, the function unsigned long long profile_start(const char *name)

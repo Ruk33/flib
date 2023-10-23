@@ -303,6 +303,42 @@ int main(void)
         printf("random between 5 and 10: %d\n", random_int_ex(0, 5, 10));
     }
     {
+        int r[] = {1,2,3,4};
+        each(int *x, r)
+            *x = *x + 1;
+        assert(r[0] == 2);
+        assert(r[1] == 3);
+        assert(r[2] == 4);
+        assert(r[3] == 5);
+    }
+    {
+        int r[] = {1,2,3,4};
+        eachn(int *x, r, 2)
+            *x = *x + 1;
+        assert(r[0] == 2);
+        assert(r[1] == 3);
+        assert(r[2] == 3);
+        assert(r[3] == 4);
+    }
+    {
+        int r[] = {1,2,3,4};
+        rev(int *x, r)
+            *x = *x + 1;
+        assert(r[0] == 2);
+        assert(r[1] == 3);
+        assert(r[2] == 4);
+        assert(r[3] == 5);
+    }
+    {
+        int r[] = {1,2,3,4};
+        revn(int *x, r, 2)
+            *x = *x + 1;
+        assert(r[0] == 1);
+        assert(r[1] == 2);
+        assert(r[2] == 4);
+        assert(r[3] == 5);
+    }
+    {
         struct coroutine coro = {0};
         test_coroutine(&coro);
         test_coroutine(&coro);
