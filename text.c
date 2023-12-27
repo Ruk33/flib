@@ -146,7 +146,7 @@ char *find(char *src, char *what)
 int find_index(char *src, char *what)
 {
     char *first = find(src, what);
-    int r = 0;
+    int r = -1;
     if (first)
         r = (int) (size_t) (first - src);
     return r;
@@ -161,6 +161,7 @@ char *find_last(char *src, char *what)
         if (!tail)
             break;
         last = tail;
+        tail++;
     }
     return last;
 }
@@ -168,7 +169,7 @@ char *find_last(char *src, char *what)
 int find_last_index(char *src, char *what)
 {
     char *last = find_last(src, what);
-    int r = 0;
+    int r = -1;
     if (last)
         r = (int) (size_t) (last - src);
     return r;
@@ -241,6 +242,7 @@ void erase_last(char *src, char *what)
         if (!tail)
             break;
         last = tail;
+        tail++;
     }
     if (last)
         erase_bytes(last, 0, strlen(what));
@@ -277,6 +279,7 @@ void replace_last(char *src, char *original, char *replacement)
         if (!tail)
             break;
         last = tail;
+        tail++;
     }
     if (!last)
         return;
@@ -345,6 +348,8 @@ void repeat(char *src, char *what, int n, size_t times)
         insert(at_n, what, 0);
 }
 
+#if 0
+// example on how to use these functions
 int main()
 {
     char buf[256] = "lorem ipsum dolor sit amet";
@@ -405,7 +410,26 @@ int main()
     assert(begins_with(buf, "this"));
 #endif
     
+#if 1
+    // utf8
+    prepend(buf, "x•¹·êŒ˜");
+    fprintf(stderr, "%s\n", buf);
+    
+    char *next_letter = 0;
+    unsigned int utf8_letter = letter(buf, &next_letter);
+    // 4 from next letter + 1 for null terminator.
+    char printable_utf8_letter[5] = {0};
+    memcpy(printable_utf8_letter, &utf8_letter, 4);
+    fprintf(stderr, "letter %s\n", printable_utf8_letter);
+#endif
+    
+#if 1
+    repeat(buf, "repeatme", 0, 3);
+    fprintf(stderr, "repeat '%s'\n", buf);
+#endif
+    
     fprintf(stderr, "done\n");
     
     return 0;
 }
+#endif
