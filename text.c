@@ -348,87 +348,101 @@ void repeat(char *src, char *what, int n, size_t times)
         insert(at_n, what, 0);
 }
 
-#if 0
+#ifdef run
 // example on how to use these functions
 int main()
 {
+#define test(x) \
+(assert((x) && "failed " #x), fprintf(stderr, "passed - %s\n", #x))
+    
+    fprintf(stderr, "\n\nrunning tests from text.c\n\n");
+    
     char buf[256] = "lorem ipsum dolor sit amet";
     
-    assert(begins_with(buf, "lorem"));
-    assert(ends_with(buf, "amet"));
-    assert(!ends_with(buf, "ame"));
-    assert(contains(buf, "dolor"));
-    assert(begins_with(from(buf, -4), "amet"));
+    test(begins_with(buf, "lorem"));
+    test(ends_with(buf, "amet"));
+    test(!ends_with(buf, "ame"));
+    test(contains(buf, "dolor"));
+    test(begins_with(from(buf, -4), "amet"));
     
 #if 1
-    assert(!contains(buf, "franco"));
+    test(letters("x•¹·êŒ˜") == 2);
+#endif
+    
+#if 1
+    test(bytes("x•¹·êŒ˜") == sizeof("x•¹·êŒ˜"));
+#endif
+    
+#if 1
+    test(!contains(buf, "franco"));
     insert(buf, "franco ", find_index(buf, "ipsum"));
-    fprintf(stderr, "inserted '%s'\n", buf);
+    // fprintf(stderr, "inserted '%s'\n", buf);
 #endif
     
 #if 1
-    assert(contains(buf, "franco "));
+    test(contains(buf, "franco "));
     erase(buf, "franco ");
-    fprintf(stderr, "erased franco from '%s'\n", buf);
-    assert(!contains(buf, "franco "));
+    // fprintf(stderr, "erased franco from '%s'\n", buf);
+    test(!contains(buf, "franco "));
 #endif
     
 #if 1
-    assert(!contains(buf, "foo"));
+    test(!contains(buf, "foo"));
     replace(buf, "ipsum", "foo");
-    fprintf(stderr, "replace ipsum with foo '%s'\n", buf);
-    assert(!contains(buf, "ipsum"));
-    assert(contains(buf, "foo"));
+    // fprintf(stderr, "replace ipsum with foo '%s'\n", buf);
+    test(!contains(buf, "ipsum"));
+    test(contains(buf, "foo"));
 #endif
     
 #if 1
     append(buf, " this is a new ending");
-    fprintf(stderr, "adding new ending '%s'\n", buf);
-    assert(ends_with(buf, " this is a new ending"));
+    // fprintf(stderr, "adding new ending '%s'\n", buf);
+    test(ends_with(buf, " this is a new ending"));
 #endif
     
 #if 1
     prepend(buf, "this is a new beginning ");
-    fprintf(stderr, "adding new beginning '%s'\n", buf);
-    assert(begins_with(buf, "this is a new beginning "));
+    // fprintf(stderr, "adding new beginning '%s'\n", buf);
+    test(begins_with(buf, "this is a new beginning "));
 #endif
     
 #if 1
     prepend(buf, "        ");
     append(buf, "  ");
-    fprintf(stderr, "adding spaces '%s'\n", buf);
+    // fprintf(stderr, "adding spaces '%s'\n", buf);
     trim(buf);
-    fprintf(stderr, "trimming spaces '%s'\n", buf);
-    assert(!begins_with(buf, " "));
-    assert(!ends_with(buf, " "));
+    // fprintf(stderr, "trimming spaces '%s'\n", buf);
+    test(!begins_with(buf, " "));
+    test(!ends_with(buf, " "));
 #endif
     
 #if 1
     substr(buf, 0, 4);
-    fprintf(stderr, "new substr '%s'\n", buf);
-    assert(letters(buf) == 4);
-    assert(begins_with(buf, "this"));
+    // fprintf(stderr, "new substr '%s'\n", buf);
+    test(letters(buf) == 4);
+    test(begins_with(buf, "this"));
 #endif
     
 #if 1
     // utf8
     prepend(buf, "x•¹·êŒ˜");
-    fprintf(stderr, "%s\n", buf);
+    // fprintf(stderr, "%s\n", buf);
     
     char *next_letter = 0;
     unsigned int utf8_letter = letter(buf, &next_letter);
     // 4 from next letter + 1 for null terminator.
     char printable_utf8_letter[5] = {0};
     memcpy(printable_utf8_letter, &utf8_letter, 4);
-    fprintf(stderr, "letter %s\n", printable_utf8_letter);
+    // fprintf(stderr, "letter %s\n", printable_utf8_letter);
 #endif
     
 #if 1
     repeat(buf, "repeatme", 0, 3);
-    fprintf(stderr, "repeat '%s'\n", buf);
+    test(begins_with(buf, "repeatmerepeatmerepeatme"));
+    // fprintf(stderr, "repeat '%s'\n", buf);
 #endif
     
-    fprintf(stderr, "done\n");
+    fprintf(stderr, "all good!\n");
     
     return 0;
 }
