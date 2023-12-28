@@ -119,7 +119,7 @@ sqr(5); // -> 25
 <hr />
 
 <h4><code>#define coroutine(ctx)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L46">[source code]</a></h4>
-<p>begin a coroutine block. check <a href="https://github.com/Ruk33/flib/blob/master/util.c#L95">this example</a>.</p>
+<p>begin a coroutine block. check <a href="https://github.com/Ruk33/flib/blob/master/util.c#L95">this example</a>. this is a faked coroutine block by using a technique that abuses the behavior of a switch statement. <a target="_blank" rel="noopener" href="https://www.chiark.greenend.org.uk/~sgtatham/coroutines.html">read more about it</a>.</p>
 <pre>
 struct coroutine ctx = {0};
 
