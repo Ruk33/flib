@@ -18,6 +18,13 @@ typedef int64_t i64;
 
 #define countof(x) \
 (sizeof(x) / sizeof(*(x)))
+#define count_of countof
+
+#define countargs_(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) \
+N
+#define countargs(...) \
+countargs_(__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+#define count_args countargs
 
 #ifndef abs
 #define abs(x) \
@@ -48,16 +55,22 @@ struct coroutine *__coro = (ctx); \
 switch (__coro->state) \
 case 0:
 
-#define yield(id) \
+#define yield_to(id) \
 __coro->state = (id); \
 break; \
 case (id):
 
-#define syield(id, sleep_for, dt) \
+#define yield(...) \
+yield_to(__COUNTER__ + 1)
+
+#define syield_to(id, sleep_for, dt) \
 __coro->sleep = (sleep_for); \
 yield(id); \
 __coro->sleep -= (dt); \
 if (__coro->sleep > 0) break
+
+#define syield(sleep_for, dt) \
+syield_to(__COUNTER__ + 1, (sleep_for), (dt))
 
 #define reset \
 *__coro = (struct coroutine) {0}
@@ -96,10 +109,10 @@ void test_coroutine(struct coroutine *ctx)
 {
     coroutine(ctx) {
         fprintf(stderr, "first yield.\n");
-        yield(10);
+        yield();
         
         fprintf(stderr, "simulate waiting 3 seconds.\n");
-        syield(20, 3.0f, 1.0f);
+        syield(3.0f, 1.0f);
         
         fprintf(stderr, "final yield!\n");
     }
@@ -129,6 +142,8 @@ int main()
     
     int test[8] = {0};
     test(countof(test) == 8);
+    
+    test(countargs(1, 2, 3) == 3);
     
     test(abs(-2) == 2);
     test(abs(42) == 42);

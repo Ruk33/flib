@@ -66,14 +66,23 @@ struct coroutine {
 </pre>
         
 <h4><code>#define countof(x)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L19">[source code]</a></h4>
-<p>calculate length of fixed array.</p>
+<p>calculate length of fixed array. alias: <code>count_of</code>.</p>
 <pre>
 int test[8] = {0};
 countof(test); // -> 8
+count_of(test); // -> 8
+</pre>
+<hr />
+        
+<h4><code>#define countargs(...)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L25">[source code]</a></h4>
+<p>counts given arguments (up to 10) alias: <code>count_args</code>.</p>
+<pre>
+countargs(1, 2, 5); // -> 3
+count_args(1, 2, 5); // -> 3
 </pre>
 <hr />
 
-<h4><code>#define abs(x)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L22">[source code]</a></h4>
+<h4><code>#define abs(x)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L30">[source code]</a></h4>
 <p>calculate absolute value from x.</p>
 <pre>
 abs(-2); // -> 2
@@ -81,21 +90,21 @@ abs(8); // -> 8
 </pre>
 <hr />
 
-<h4><code>#define min(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L28">[source code]</a></h4>
+<h4><code>#define min(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L35">[source code]</a></h4>
 <p>get minimum value between a and b.</p>
 <pre>
 min(2, 4); // -> 2
 </pre>
 <hr />
 
-<h4><code>#define max(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L33">[source code]</a></h4>
+<h4><code>#define max(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L40">[source code]</a></h4>
 <p>calculate maximum value between a and b.</p>
 <pre>
 max(2, 4); // -> 4
 </pre>
 <hr />
 
-<h4><code>#define clamp(x, a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L37">[source code]</a></h4>
+<h4><code>#define clamp(x, a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L44">[source code]</a></h4>
 <p>limit x to be between a and b.</p>
 <pre>
 clamp(2, 1, 8); // -> 2
@@ -104,22 +113,22 @@ clamp(10, 3, 8); // -> 8
 </pre>
 <hr />
 
-<h4><code>#define lerp(start, end, t)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L40">[source code]</a></h4>
+<h4><code>#define lerp(start, end, t)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L47">[source code]</a></h4>
 <p>linear interpolation between start and end using t as weight. t being a normalized value ([0, 1])</p>
 <pre>
 lerp(1, 10, 0.5f); // -> 5.5f
 </pre>
 <hr />
 
-<h4><code>#define sqr(x)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L43">[source code]</a></h4>
+<h4><code>#define sqr(x)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L50">[source code]</a></h4>
 <p>x ^ 2</p>
 <pre>
 sqr(5); // -> 25
 </pre>
 <hr />
 
-<h4><code>#define coroutine(ctx)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L46">[source code]</a></h4>
-<p>begin a coroutine block. check <a href="https://github.com/Ruk33/flib/blob/master/util.c#L95">this example</a>. this is a faked coroutine block by using a technique that abuses the behavior of a switch statement. <a target="_blank" rel="noopener" href="https://www.chiark.greenend.org.uk/~sgtatham/coroutines.html">read more about it</a>.</p>
+<h4><code>#define coroutine(ctx)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L53">[source code]</a></h4>
+<p>begin a coroutine block. check <a href="https://github.com/Ruk33/flib/blob/master/util.c#L108">this example</a>. this is a faked coroutine block by using a technique that abuses the behavior of a switch statement. <a target="_blank" rel="noopener" href="https://www.chiark.greenend.org.uk/~sgtatham/coroutines.html">read more about it</a>.</p>
 <pre>
 struct coroutine ctx = {0};
 
@@ -127,10 +136,10 @@ void test_coroutine()
 {
     coroutine(&ctx) {
         fprintf(stderr, "this block will execute first\n");
-        yield(10);
+        yield();
         
         fprintf(stderr, "and when this block runs again, this line will be executed skipping the previous yield.\n");
-        yield(20);
+        yield();
 
         // reset coroutine state.
         reset;
@@ -154,28 +163,42 @@ test_coroutine();
 </pre>
 <hr />
 
-<h4><code>#define yield(id)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L51">[source code]</a></h4>
-<p>yield from a coroutine.</p>
+<h4><code>#define yield_to(id)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L58">[source code]</a></h4>
+<p>yield from a coroutine specifying an id. unless you need to specify an id, use <code>yield</code>.</p>
 <pre>
 // ...
 </pre>
 <hr />
 
-<h4><code>#define syield(id, sleep_for, dt)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L56">[source code]</a></h4>
-<p>yield and sleep for sleep_for seconds. dt represents how much time has past (for instance, in a game context, this would be the frame time)</p>
+<h4><code>#define yield()</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L58">[source code]</a></h4>
+<p>yield from a coroutine using <code>__COUNTER__ + 1</code> as id.</p>
 <pre>
 // ...
 </pre>
 <hr />
 
-<h4><code>#define reset</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L62">[source code]</a></h4>
+<h4><code>#define syield_to(id, sleep_for, dt)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L58">[source code]</a></h4>
+<p>yield and sleep for sleep_for from a coroutine specifying an id. unless you need to specify the id, use <code>syield</code>.</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define syield(sleep_for, dt)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L72">[source code]</a></h4>
+<p>yield and sleep for sleep_for seconds using <code>__COUNTER__ + 1</code> as id. <code>dt</code> represents how much time has past (for instance, in a game context, this would be the frame time)</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define reset</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L75">[source code]</a></h4>
 <p>reset the state of the running coroutine, the next time the coroutine block runs, it will start from the beginning.</p>
 <pre>
 // ...
 </pre>
 <hr />
 
-<h4><code>u32 random_int(u32 *seed);</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L73">[source code]</a></h4>
+<h4><code>u32 random_int(u32 *seed);</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L86">[source code]</a></h4>
 <p>generate a random int. seed can be null in which case, a debug test seed will be used.</p>
 <pre>
 random_int(0); // -> random int
@@ -183,7 +206,7 @@ random_int(0); // -> random int
 </pre>
 <hr />
 
-<h4><code>u32 random_int_between(u32 *seed, u32 lower, u32 upper);</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L73">[source code]</a></h4>
+<h4><code>u32 random_int_between(u32 *seed, u32 lower, u32 upper);</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L96">[source code]</a></h4>
 <p>generate a random int between lower and upper. seed can be null in which case, a debug test seed will be used.</p>
 <pre>
 random_int_between(0, 10, 100); // -> random int between 10 and 100
