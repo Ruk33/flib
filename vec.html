@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>flib</title>
+    <style>
+      body {
+        background-color: #F1E4C3;
+      }
+      main {
+        margin: 0 auto;
+        width: 600px;
+        font-size: 22px;
+      }
+      h4 a {
+        font-weight: normal;
+        font-size: 16px;
+        display: block;
+      }
+      pre {
+        background-color: #C6A969;
+        border: 2px solid;
+        border-color: #597E52;
+        font-size: 16px;
+        padding: 12px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+        <a href="index.html">go back</a>
+        <h2>vec <a href="https://github.com/Ruk33/flib/blob/master/vec.c">[source code]</a></h2>
+        <ul>
+          <li>these functions don't allocate memory.</li>
+          <li>these functions use float for each dimension. the number of dimensions are 4: x, y, z, w. even though this may be wasteful, it's a tradeoff i'm willing to do.</li>
+          <li>these functions are provided as is, use it at your own risk.</li>
+        </ul>
+
+        <hr />
+        <h3>api</h3>
+        
+<h4><code>vec vadd(vec a, vec b);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L6">[source code]</a></h4>
+<p>add vectors a and b.</p>
+<pre>
+vec a = {2, 3};
+vec b = {3, 4};
+vadd(a, b) // -> {5, 7, 0, 0}
+</pre>
+<hr />
+        
+<h4><code>vec vsub(vec a, vec b);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L17">[source code]</a></h4>
+<p>subtract vectors a and b.</p>
+<pre>
+vec a = {2, 4};
+vec b = {1, 2};
+vsub(a, b) // -> {1, 2, 0, 0}
+</pre>
+<hr />
+        
+<h4><code>vec vscale(vec a, float x);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L28">[source code]</a></h4>
+<p>scale vector a by x.</p>
+<pre>
+vec a = {2, 4};
+vscale(a, 3) // -> {6, 12, 0, 0}
+</pre>
+<hr />
+        
+<h4><code>float vlen2(vec src);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L39">[source code]</a></h4>
+<p>get length of src ^ 2.</p>
+<pre>
+vec a = {2, 3};
+vlen2(a) // -> 13.0f
+</pre>
+<hr />
+        
+<h4><code>float vlen(vec src);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L48">[source code]</a></h4>
+<p>get length of src.</p>
+<pre>
+vec a = {2, 3};
+vlen(a) // -> 3.60f
+</pre>
+<hr />
+        
+<h4><code>vec vnorm(vec src);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L54">[source code]</a></h4>
+<p>get normalized vector from src.</p>
+<pre>
+vec a = {2, 3};
+vnorm(a) // -> {0.55f, 0.83f, 0, 0}
+</pre>
+<hr />
+        
+<h4><code>float vdist2(vec src, vec target);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L68">[source code]</a></h4>
+<p>calculate distance ^ 2 between src and target.</p>
+<pre>
+vec a = {2, 3};
+vec b = {6, 9};
+vdist2(a, b) // -> 52.0f
+</pre>
+<hr />
+        
+<h4><code>float vdist(vec src, vec target);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L80">[source code]</a></h4>
+<p>calculate distance between src and target.</p>
+<pre>
+vec a = {2, 3};
+vec b = {6, 9};
+vdist2(a, b) // -> 7.21f
+</pre>
+<hr />
+        
+<h4><code>float vdot(vec a, vec b);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L86">[source code]</a></h4>
+<p>calculate dot product from a and b.</p>
+<pre>
+vec a = {2, 3};
+vec b = {6, 9};
+vdot(a, b) // -> 
+</pre>
+<hr />
+        
+<h4><code>vec vcross(vec a, vec b);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L92">[source code]</a></h4>
+<p>calculate cross product from a and b.</p>
+<pre>
+vec a = {2, 3};
+vec b = {6, 9};
+vcross(a, b) // -> 
+</pre>
+<hr />
+        
+<h4><code>vec vdir2(vec src, vec target);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L102">[source code]</a></h4>
+<p>calculate direction from src to target. returns normalized vector.</p>
+<pre>
+vec a = {2, 3};
+vec b = {6, 9};
+vdir2(a, b) // -> 
+</pre>
+<hr />
+        
+<h4><code>float vangle2(vec src, vec target);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L108">[source code]</a></h4>
+<p>calculate angle in radians from src to target.</p>
+<pre>
+vec a = {2, 3};
+vec b = {6, 9};
+vangle2(a, b) // -> 
+</pre>
+<hr />
+        
+<h4><code>vec vlerp(vec src, vec to, float t);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L114">[source code]</a></h4>
+<p>calculate linear interpolation between src and to using t as weight. t being a normalized value ([0, 1])</p>
+<pre>
+vec a = {2, 3};
+vec b = {6, 9};
+vlerp(a, b, 0.5f) // -> 
+</pre>
+<hr />
+    </main>
+  </body>
+</html>

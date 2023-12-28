@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>flib</title>
+    <style>
+      body {
+        background-color: #F1E4C3;
+      }
+      main {
+        margin: 0 auto;
+        width: 600px;
+        font-size: 22px;
+      }
+      h4 a {
+        font-weight: normal;
+        font-size: 16px;
+        display: block;
+      }
+      pre {
+        background-color: #C6A969;
+        border: 2px solid;
+        border-color: #597E52;
+        font-size: 16px;
+        padding: 12px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+        <a href="index.html">go back</a>
+        <h2>text <a href="https://github.com/Ruk33/flib/blob/master/text.c">[source code]</a></h2>
+        <ul>
+          <li>these functions don't allocate memory. that's up to the user. based on the operation performed, it should be pretty easy to calculate the proper buffer size (at least it is for my personal cases).</li>
+          <li>the user must ensure that the buffer passed is big enough for the required operation to be performed (for instance, appending text)</li>
+          <li>all strings must be null terminated.</li>
+          <li>these functions won't check if the text is a valid utf-8.</li>
+          <li>0 is used instead of null (shorter to write and it's the same)</li>
+          <li>these functions are provided as is, use it at your own risk.</li>
+        </ul>
+
+        <hr />
+        <h3>api</h3>
+        
+<h4><code>size_t letters(char *src);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L68">[source code]</a></h4>
+<p>count letters from src (utf-8)</p>
+<pre>
+char buf[256] = "𥹷ꌘ";
+letters(buf) // -> 2
+</pre>
+<hr />
+
+<h4><code>size_t bytes(char *src);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L79">[source code]</a></h4>
+<p>count bytes used by src including null terminator.</p>
+<pre>
+char buf[256] = "𥹷ꌘ";
+bytes(buf) // -> 8 (7 from letters + null terminator)
+</pre>
+<hr />
+
+<h4><code>unsigned int letter(char *src, char **next);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L86">[source code]</a></h4>
+<p>get utf-8 letter, and set the pointer to the following letter in next. if there are no more letters, next won't be updated and the result will be 0.</p>
+<pre>
+char buf[256] = "𥹷ꌘ";
+char *next_letter = 0;
+unsigned int utf8_letter = letter(buf, &next_letter);
+// 4 to store the letter + 1 for null terminator.
+char printable_utf8_letter[5] = {0};
+memcpy(printable_utf8_letter, &utf8_letter, 4);
+printf("letter %s\n", printable_utf8_letter) // -> 𥹷, next_letter points to the beginning of ꌘ
+</pre>
+<hr />
+
+<h4><code>int begins_withn(char *src, char *what, size_t n);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L106">[source code]</a></h4>
+<p>check if src begins with n bytes of what.</p>
+<pre>
+char buf[256] = "lorem ipsum dolor sit amet";
+begins_withn(buf, "lorem", strlen("lorem")); // -> 1
+begins_withn(buf, "ipsum", strlen("ipsum")); // -> 0
+</pre>
+<hr />
+
+<h4><code>int begins_with(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L112">[source code]</a></h4>
+<p>check if src begins with what.</p>
+<pre>
+char buf[256] = "lorem ipsum dolor sit amet";
+begins_with(buf, "lorem"); // -> 1
+begins_with(buf, "ipsum"); // -> 0
+</pre>
+<hr />
+
+<h4><code>int ends_withn(char *src, char *what, size_t n);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L118">[source code]</a></h4>
+<p>check if src ends with n bytes of what.</p>
+<pre>
+char buf[256] = "lorem ipsum dolor sit amet";
+ends_withn(buf, "amet", strlen("amet")); // -> 1
+ends_withn(buf, "ipsum", strlen("ipsum")); // -> 0
+</pre>
+<hr />
+
+<h4><code>int ends_with(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L128">[source code]</a></h4>
+<p>check if src ends with what.</p>
+<pre>
+char buf[256] = "lorem ipsum dolor sit amet";
+ends_with(buf, "amet"); // -> 1
+ends_with(buf, "ipsum"); // -> 0
+</pre>
+<hr />
+
+<h4><code>int contains(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L134">[source code]</a></h4>
+<p>check if src contains what.</p>
+<pre>
+char buf[256] = "lorem ipsum dolor sit amet";
+contains(buf, "dolor"); // -> 1
+contains(buf, "foo"); // -> 0
+</pre>
+<hr />
+
+<h4><code>char *find(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L140">[source code]</a></h4>
+<p>find what in src. null is returned if no match is found.</p>
+<pre>
+char buf[256] = "lorem ipsum dolor sit amet";
+find(buf, "dolor"); // -> "dolor sit..."
+find(buf, "foo"); // -> 0
+</pre>
+<hr />
+
+<h4><code>int find_index(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L146">[source code]</a></h4>
+<p>same as find but instead of returning a pointer, it returns an index (starting from 0) if no match, -1 is returned.</p>
+<pre>
+char buf[256] = "lorem ipsum dolor sit amet";
+find_index(buf, "ipsum"); // -> 6
+find_index(buf, "foo"); // -> -1
+</pre>
+<hr />
+
+<h4><code>char *find_last(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L155">[source code]</a></h4>
+<p>find last match of what in src. null is returned if no match is found.</p>
+<pre>
+char buf[256] = "lorem ipsum lorem dolor sit amet";
+find_last(buf, "lorem"); // -> "lorem dolor ..."
+find_last(buf, "foo"); // -> 0
+</pre>
+<hr />
+
+<h4><code>int find_last_index(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L169">[source code]</a></h4>
+<p>same as find_last but returns an index starting from 0. if no match, -1 is returned.</p>
+<pre>
+char buf[256] = "lorem ipsum lorem dolor sit amet";
+find_last_index(buf, "lorem"); // -> 13
+find_last_index(buf, "foo"); // -> -1
+</pre>
+<hr />
+
+<h4><code>char *from(char *src, int n);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L178">[source code]</a></h4>
+<p>get pointer from src + n. n can be negative, for example, "lorem", -3, a pointer to "rem" will be returned.</p>
+<pre>
+char buf[256] = "lorem ipsum dolor sit amet";
+from(buf, 6); // -> "ipsum dolor ..."
+from(buf, -4); // -> "amet"
+</pre>
+<hr />
+
+<h4><code>void insertn(char *src, char *what, size_t max, int n);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L192">[source code]</a></h4>
+<p>insert max bytes of what into src at index n.</p>
+<pre>
+char buf[256] = "lorem dolor sit amet";
+insertn(buf, "ipsum ", strlen("ipsum "), find_index(buf, "dolor")); // -> "lorem ipsum dolor ..."
+</pre>
+<hr />
+
+<h4><code>void insert(char *src, char *what, int n);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L202">[source code]</a></h4>
+<p>insert what into src starting at index n.</p>
+<pre>
+char buf[256] = "lorem dolor sit amet";
+insert(buf, "ipsum ", find_index(buf, "dolor")); // -> "lorem ipsum dolor ..."
+</pre>
+<hr />
+
+<h4><code>void erase_bytes(char *src, int n, size_t bytes);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L207">[source code]</a></h4>
+<p>erase bytes amount from src at index n.</p>
+<pre>
+char buf[256] = "lorem ipsum dolor sit amet";
+erase_bytes(buf, 0, 6); // -> "ipsum dolor ..."
+</pre>
+<hr />
+
+<h4><code>void erase(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L217">[source code]</a></h4>
+<p>erase what from src.</p>
+<pre>
+char buf[256] = "lorem ipsum lorem dolor sit amet";
+erase(buf, "lorem "); // -> "ipsum dolor sit amet"
+</pre>
+<hr />
+
+<h4><code>void erase_first(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L229">[source code]</a></h4>
+<p>erase only the first match of what from src.</p>
+<pre>
+char buf[256] = "lorem ipsum lorem dolor sit amet";
+erase_first(buf, "lorem "); // -> "ipsum lorem dolor..."
+</pre>
+<hr />
+
+<h4><code>void erase_last(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L236">[source code]</a></h4>
+<p>erase only last match of what from src.</p>
+<pre>
+char buf[256] = "lorem ipsum lorem dolor sit amet";
+erase_last(buf, "lorem "); // -> "lorem ipsum dolor..."
+</pre>
+<hr />
+
+<h4><code>void replace(char *src, char *original, char *replacement);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L251">[source code]</a></h4>
+<p>replace original from src with replacement.</p>
+<pre>
+char buf[256] = "lorem ipsum lorem dolor sit amet";
+replace(buf, "lorem", "foo"); // -> "foo ipsum foo dolor..."
+</pre>
+<hr />
+
+<h4><code>void replace_first(char *src, char *original, char *replacement);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L264">[source code]</a></h4>
+<p>replace only first match of original with replacement from src.</p>
+<pre>
+char buf[256] = "lorem ipsum lorem dolor sit amet";
+replace_first(buf, "lorem", "foo"); // -> "foo ipsum lorem dolor..."
+</pre>
+<hr />
+
+<h4><code>void replace_last(char *src, char *original, char *replacement);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L273">[source code]</a></h4>
+<p>replace only last match of original with replacement from src.</p>
+<pre>
+char buf[256] = "lorem ipsum lorem dolor sit amet";
+replace_last(buf, "lorem", "foo"); // -> "lorem ipsum foo dolor..."
+</pre>
+<hr />
+
+<h4><code>int empty(char *src);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L290">[source code]</a></h4>
+<p>check if src is an empty string.</p>
+<pre>
+empty(""); // -> 1
+empty("foo"); // -> 0
+</pre>
+<hr />
+
+<h4><code>void appendn(char *src, char *what, size_t n);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L296">[source code]</a></h4>
+<p>append n bytes from what to src.</p>
+<pre>
+char buf[256] = "lorem ipsum";
+appendn(buf, " foo", strlen(" foo")); // -> "lorem ipsum foo"
+appendn(buf, ".!", 1); // "lorem ipsum foo.", notice no "!"
+</pre>
+<hr />
+
+<h4><code>void append(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L301">[source code]</a></h4>
+<p>append what to src.</p>
+<pre>
+char buf[256] = "lorem ipsum";
+append(buf, " foo"); // -> "lorem ipsum foo"
+</pre>
+<hr />
+
+<h4><code>void prependn(char *src, char *what, size_t n);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L306">[source code]</a></h4>
+<p>insert n bytes from what at the beginning of src.</p>
+<pre>
+char buf[256] = "lorem ipsum";
+prependn(buf, "foo ", strlen("foo ")); // -> "foo lorem ipsum"
+prependn(buf, "!!", 1); // -> "!foo lorem ipsum"
+</pre>
+<hr />
+
+<h4><code>void prepend(char *src, char *what);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L312">[source code]</a></h4>
+<p>insert what at the beginning of src.</p>
+<pre>
+char buf[256] = "lorem ipsum";
+prepend(buf, "foo "); // -> "foo lorem ipsum"
+</pre>
+<hr />
+
+<h4><code>void trim(char *src);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L317">[source code]</a></h4>
+<p>remove all the white space at the beginning and the end from src.</p>
+<pre>
+char buf[256] = "    lorem ipsum      ";
+trim(buf); // -> "lorem ipsum"
+</pre>
+<hr />
+
+<h4><code>void substr(char *src, int n, size_t max);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L335">[source code]</a></h4>
+<p>update src to be max bytes starting at index n.</p>
+<pre>
+char buf[256] = "lorem ipsum";
+substr(buf, 0, 5); // -> "lorem"
+</pre>
+<hr />
+
+<h4><code>void repeat(char *src, char *what, int n, size_t times);</code> <a href="https://github.com/Ruk33/flib/blob/master/text.c#L344">[source code]</a></h4>
+<p>repeat what times to src starting at index n.</p>
+<pre>
+char buf[256] = "lorem ipsum";
+repeat(buf, "foo ", 0, 3); // -> "foo foo foo lorem ..."
+</pre>
+<hr />
+    </main>
+  </body>
+</html>
