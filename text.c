@@ -348,7 +348,7 @@ void repeat(char *src, char *what, int n, size_t times)
         insert(at_n, what, 0);
 }
 
-#ifdef run
+#ifdef run_text
 // example on how to use these functions
 int main()
 {

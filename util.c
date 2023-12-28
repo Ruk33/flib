@@ -101,7 +101,7 @@ u32 random_int_between(u32 *seed, u32 lower, u32 upper)
     return r;
 }
 
-#ifdef run
+#ifdef run_util
 #include <assert.h>
 #include <stdio.h>
 
@@ -172,5 +172,7 @@ int main()
     test_coroutine(&ctx);
     test_coroutine(&ctx);
     test_coroutine(&ctx);
+    
+    fprintf(stderr, "all done!\n");
 }
 #endif

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>flib</title>
+    <style>
+      body {
+        background-color: #F1E4C3;
+      }
+      main {
+        margin: 0 auto;
+        width: 600px;
+        font-size: 22px;
+      }
+      h4 a {
+        font-weight: normal;
+        font-size: 16px;
+        display: block;
+      }
+      pre {
+        background-color: #C6A969;
+        border: 2px solid;
+        border-color: #597E52;
+        font-size: 16px;
+        padding: 12px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+        <a href="index.html">go back</a>
+        <h2>vecn <a href="https://github.com/Ruk33/flib/blob/master/vecn.c">[source code]</a></h2>
+        <ul>
+          <li>requires util.c</li>
+          <li>don't use with vec.c, the function names will collide.</li>
+          <li>these functions don't allocate memory.</li>
+          <li>these functions are provided as is, use it at your own risk.</li>
+        </ul>
+
+        <hr />
+        <h3>api</h3>
+<h4><code>#define vec(n)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L6">[source code]</a></h4>
+<p>macro to define a new vector with n dimensions.</p>
+<pre>
+vec(3) position_with_3_dimensions;
+</pre>
+<hr />
+
+<h4><code>#define vecn(x)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L7">[source code]</a></h4>
+<p>get number of dimensions from vector x.</p>
+<pre>
+vec(3) position_with_3_dimensions;
+vecn(position_with_3_dimensions); // -> 3
+</pre>
+<hr />
+
+<h4><code>#define vecn2(name, ...)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L8">[source code]</a></h4>
+<p>create a variable with name using the parameters as dimensions. <b>IMPORTANT!</b> make sure to use decimal numbers or the macro won't work (for instance, don't pass 2 as a value, pass 2. or 2.0f)</p>
+<pre>
+vecn2(foo, 2.0f, 3.0f); // -> foo is 2.0f, 3.0f
+vecn2(bar, 5.0f, 3.0f, 2.0f); // -> bar has three dimensions.
+</pre>
+<hr />
+
+<h4><code>#define vfrom(dest, src)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L9">[source code]</a></h4>
+<p>create a vector dest from src.</p>
+<pre>
+vecn2(foo, 2.0f, 3.0f);
+vfrom(bar, foo); // -> bar = foo
+</pre>
+<hr />
+
+<h4><code>#define vcpy(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L11">[source code]</a></h4>
+<p>copy vector b to vector a.</p>
+<pre>
+vecn2(foo, 2.0f, 3.0f);
+vecn2(bar, 3.0f, 4.0f, 5.0f);
+vcpy(bar, foo); // bar will be 2.0f, 3.0f, 5.0f
+</pre>
+<hr />
+
+<h4><code>#define vadd(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L13">[source code]</a></h4>
+<p>add vector b to a.</p>
+<pre>
+vecn2(foo, 2.0f, 4.0f);
+vecn2(bar, 1.0f);
+vadd(bar, foo); // bar will be 3.0f
+</pre>
+<hr />
+
+<h4><code>#define vsub(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L15">[source code]</a></h4>
+<p>subtract vector b from a.</p>
+<pre>
+vecn2(foo, 2.0f, 4.0f);
+vecn2(bar, 5.0f);
+vsub(bar, foo); // bar will be -3.0f
+</pre>
+<hr />
+
+<h4><code>#define vscale(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L17">[source code]</a></h4>
+<p>scale vector a by b.</p>
+<pre>
+vecn2(foo, 2.0f, 4.0f);
+vscale(foo, 2.0f); // foo will be 4.0f, 8.0f
+</pre>
+<hr />
+
+<h4><code>#define vlen2(a)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L19">[source code]</a></h4>
+<p>get length ^ 2 of vector a.</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define vlen(a)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L21">[source code]</a></h4>
+<p>get length of vector a.</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define vnorm(a)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L23">[source code]</a></h4>
+<p>normalize vector a.</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define vdist2(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L25">[source code]</a></h4>
+<p>get distance ^ 2 between a and b.</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define vdist(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L27">[source code]</a></h4>
+<p>get distance between vector a and b.</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define vdot(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L29">[source code]</a></h4>
+<p>dot product between vector a and b.</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define vdir2(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L31">[source code]</a></h4>
+<p>calculate direction (normalized) between a and b and store the result in a.</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define vlerp(a, b, t)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L33">[source code]</a></h4>
+<p>linear interpolation from vector a to vector b using t as weight. t being a normalized ([0, 1]) value.</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define vdebug(a)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L35">[source code]</a></h4>
+<p>print vector a to stderr. useful for debug purposes.</p>
+<pre>
+vecn2(position, 3.0f, 2.0f);
+vdebug(position); // prints "position -> (3.0f, 2.0f)\n" 
+</pre>
+<hr />
+
+<h4><code>#define vset(x, ...)</code> <a href="https://github.com/Ruk33/flib/blob/master/vecn.c#L38">[source code]</a></h4>
+<p>set vector x with supplied parameters.</p>
+<pre>
+vec(2) position;
+vset(position, 2.0f, 3.0f); // position will be 2.0f, 3.0f
+vset(position, 2.0f, 3.0f, 4.0f); // safe, parameters exceeding the dimensions will be ignored.
+vset(position, 5.0f); // position will be 5.0f, 3.0f
+</pre>
+<hr />
+    </main>
+  </body>
+</html>
