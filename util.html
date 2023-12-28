@@ -126,10 +126,10 @@ struct coroutine ctx = {0};
 void test_coroutine()
 {
     coroutine(&ctx) {
-        fprintf(stderr, "this block will execute first");
+        fprintf(stderr, "this block will execute first\n");
         yield(10);
         
-        fprintf(stderr, "and when this block runs again, this line will be executed skipping the previous yield.");
+        fprintf(stderr, "and when this block runs again, this line will be executed skipping the previous yield.\n");
         yield(20);
 
         // reset coroutine state.
@@ -139,6 +139,18 @@ void test_coroutine()
 
 test_coroutine();
 test_coroutine();
+
+// would print:
+// "this block will execute first"
+// "and when this block runs again, this line will be executed skipping the previous yield."
+
+// notice that one message gets print first, and then the next one instead of
+// a regular function call which would print this instead:
+
+// "this block will execute first"
+// "and when this block runs again, this line will be executed skipping the previous yield."
+// "this block will execute first"
+// "and when this block runs again, this line will be executed skipping the previous yield."
 </pre>
 <hr />
 
