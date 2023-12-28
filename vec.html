@@ -41,13 +41,21 @@
 
         <hr />
         <h3>api</h3>
+
+        <h4><code>union vec;</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L1">[source code]</a></h4>
+<pre>
+typedef union vec {
+    struct { float x, y, z, w; };
+    struct { float r, g, b, a; };
+} vec;
+</pre>
         
 <h4><code>vec vadd(vec a, vec b);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L6">[source code]</a></h4>
 <p>add vectors a and b.</p>
 <pre>
 vec a = {2, 3};
 vec b = {3, 4};
-vadd(a, b) // -> {5, 7, 0, 0}
+vadd(a, b) // -> {5.0f, 7.0f, 0, 0}
 </pre>
 <hr />
         
@@ -56,7 +64,7 @@ vadd(a, b) // -> {5, 7, 0, 0}
 <pre>
 vec a = {2, 4};
 vec b = {1, 2};
-vsub(a, b) // -> {1, 2, 0, 0}
+vsub(a, b) // -> {1.0f, 2.0f, 0, 0}
 </pre>
 <hr />
         
@@ -64,12 +72,12 @@ vsub(a, b) // -> {1, 2, 0, 0}
 <p>scale vector a by x.</p>
 <pre>
 vec a = {2, 4};
-vscale(a, 3) // -> {6, 12, 0, 0}
+vscale(a, 3) // -> {6.0f, 12.0f, 0, 0}
 </pre>
 <hr />
         
 <h4><code>float vlen2(vec src);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L39">[source code]</a></h4>
-<p>get length of src ^ 2.</p>
+<p>get length of src ^ 2. useful to avoid using sqrtf when not needed.</p>
 <pre>
 vec a = {2, 3};
 vlen2(a) // -> 13.0f
@@ -77,7 +85,7 @@ vlen2(a) // -> 13.0f
 <hr />
         
 <h4><code>float vlen(vec src);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L48">[source code]</a></h4>
-<p>get length of src.</p>
+<p>get length of src. note: uses sqrtf.</p>
 <pre>
 vec a = {2, 3};
 vlen(a) // -> 3.60f
@@ -138,7 +146,7 @@ vdir2(a, b) // ->
 <hr />
         
 <h4><code>float vangle2(vec src, vec target);</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L108">[source code]</a></h4>
-<p>calculate angle in radians from src to target.</p>
+<p>calculate angle in radians from src to target. to convert from radians to degrees use <code>radians * 180.0f / pi</code></code></p>
 <pre>
 vec a = {2, 3};
 vec b = {6, 9};
