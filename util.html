@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>flib</title>
+    <style>
+      body {
+        background-color: #F1E4C3;
+      }
+      main {
+        margin: 0 auto;
+        width: 600px;
+        font-size: 22px;
+      }
+      h4 a {
+        font-weight: normal;
+        font-size: 16px;
+        display: block;
+      }
+      pre {
+        background-color: #C6A969;
+        border: 2px solid;
+        border-color: #597E52;
+        font-size: 16px;
+        padding: 12px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+        <a href="index.html">go back</a>
+        <h2>util <a href="https://github.com/Ruk33/flib/blob/master/util.c">[source code]</a></h2>
+        <ul>
+          <li>these functions don't allocate memory.</li>
+          <li>these functions are provided as is, use it at your own risk.</li>
+        </ul>
+
+        <hr />
+        <h3>api</h3>
+
+        <h4><code>types</code> <a href="https://github.com/Ruk33/flib/blob/master/vec.c#L1">[source code]</a></h4>
+<pre>
+typedef uint8_t byte;
+
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+
+typedef int8_t s8;
+typedef int8_t i8;
+typedef int16_t s16;
+typedef int16_t i16;
+typedef int32_t s32;
+typedef int32_t i32;
+typedef int64_t s64;
+typedef int64_t i64;
+
+struct coroutine {
+    u64 state;
+    float sleep;
+};
+</pre>
+        
+<h4><code>#define countof(x)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L19">[source code]</a></h4>
+<p>calculate length of fixed array.</p>
+<pre>
+int test[8] = {0};
+countof(test); // -> 8
+</pre>
+<hr />
+
+<h4><code>#define abs(x)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L22">[source code]</a></h4>
+<p>calculate absolute value from x.</p>
+<pre>
+abs(-2); // -> 2
+abs(8); // -> 8
+</pre>
+<hr />
+
+<h4><code>#define min(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L28">[source code]</a></h4>
+<p>get minimum value between a and b.</p>
+<pre>
+min(2, 4); // -> 2
+</pre>
+<hr />
+
+<h4><code>#define max(a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L33">[source code]</a></h4>
+<p>calculate maximum value between a and b.</p>
+<pre>
+max(2, 4); // -> 4
+</pre>
+<hr />
+
+<h4><code>#define clamp(x, a, b)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L37">[source code]</a></h4>
+<p>limit x to be between a and b.</p>
+<pre>
+clamp(2, 1, 8); // -> 2
+clamp(2, 3, 8); // -> 3
+clamp(10, 3, 8); // -> 8
+</pre>
+<hr />
+
+<h4><code>#define lerp(start, end, t)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L40">[source code]</a></h4>
+<p>linear interpolation between start and end using t as weight. t being a normalized value ([0, 1])</p>
+<pre>
+lerp(1, 10, 0.5f); // -> 5
+</pre>
+<hr />
+
+<h4><code>#define sqr(x)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L43">[source code]</a></h4>
+<p>x ^ 2</p>
+<pre>
+sqr(5); // -> 25
+</pre>
+<hr />
+
+<h4><code>#define coroutine(ctx)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L46">[source code]</a></h4>
+<p>begin a coroutine block. check <a href="https://github.com/Ruk33/flib/blob/master/util.c#L95">this example</a>.</p>
+<pre>
+struct coroutine ctx = {0};
+
+void test_coroutine()
+{
+    coroutine(&ctx) {
+        fprintf(stderr, "this block will execute first");
+        yield(10);
+        
+        fprintf(stderr, "and when this block runs again, this line will be executed skipping the previous yield.");
+        yield(20);
+
+        // reset coroutine state.
+        reset;
+    }
+}
+
+test_coroutine();
+test_coroutine();
+</pre>
+<hr />
+
+<h4><code>#define yield(id)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L51">[source code]</a></h4>
+<p>yield from a coroutine.</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define syield(id, sleep_for, dt)</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L56">[source code]</a></h4>
+<p>yield and sleep for sleep_for seconds. dt represents how much time has past (for instance, in a game context, this would be the frame time)</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>#define reset</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L62">[source code]</a></h4>
+<p>reset the state of the running coroutine, the next time the coroutine block runs, it will start from the beginning.</p>
+<pre>
+// ...
+</pre>
+<hr />
+
+<h4><code>u32 random_int(u32 *seed);</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L73">[source code]</a></h4>
+<p>generate a random int. seed can be null in which case, a debug test seed will be used.</p>
+<pre>
+random_int(0); // -> random int
+random_int(0); // -> random int
+</pre>
+<hr />
+
+<h4><code>u32 random_int_between(u32 *seed, u32 lower, u32 upper);</code> <a href="https://github.com/Ruk33/flib/blob/master/util.c#L73">[source code]</a></h4>
+<p>generate a random int between lower and upper. seed can be null in which case, a debug test seed will be used.</p>
+<pre>
+random_int_between(0, 10, 100); // -> random int between 10 and 100
+</pre>
+<hr />
+    </main>
+  </body>
+</html>
