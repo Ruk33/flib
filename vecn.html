@@ -197,7 +197,7 @@ vset(position, 5.0f); // position will be 5.0f, 3.0f
     const response = await fetch(rawFile);
     const code = await response.text();
     const lines = code.split("\n");
-    const headers = document.getElementsByTagName("h4");
+    const headers = document.getElementsByTagName("h4").replace(";", "");
     for (let i = 0; i < headers.length; i++) {
       const name = headers.item(i).children[0].innerText;
       for (let n = 0; n < lines.length; n++) {

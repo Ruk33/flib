@@ -230,7 +230,7 @@ random_int_between(0, 10, 100); // -> random int between 10 and 100
     const lines = code.split("\n");
     const headers = document.getElementsByTagName("h4");
     for (let i = 0; i < headers.length; i++) {
-      const name = headers.item(i).children[0].innerText;
+      const name = headers.item(i).children[0].innerText.replace(";", "");
       for (let n = 0; n < lines.length; n++) {
         if (lines[n].indexOf(name) === -1)
           continue;
