@@ -163,5 +163,33 @@ vlerp(a, b, 0.5f) // ->
 </pre>
 <hr />
     </main>
+
+<script>
+  const updateLinks = async () => {
+    const file = document
+      .getElementsByTagName("h2")
+      .item(0)
+      .children[0]
+      .href;
+    const rawFile = 
+      file
+      .replace("github", "raw.githubusercontent")
+      .replace("blob/", "");
+    const response = await fetch(rawFile);
+    const code = await response.text();
+    const lines = code.split("\n");
+    const headers = document.getElementsByTagName("h4");
+    for (let i = 0; i < headers.length; i++) {
+      const name = headers.item(i).children[0].innerText;
+      for (let n = 0; n < lines.length; n++) {
+        if (lines[n].indexOf(name) === -1)
+          continue;
+        headers.item(i).children[1].href = `${file}#L${n+1}`;
+        break;
+      }
+    }
+  }
+  updateLinks();
+</script>
   </body>
 </html>
