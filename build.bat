@@ -1,4 +1,7 @@
 @echo off
-tcc -Wall -Wextra -Werror -Drun_util util.c -run
-tcc -Wall -Wextra -Werror -Drun_text text.c -run
-tcc -Wall -Wextra -Werror -Drun_vecn vecn.c -run
+
+call vcvarsall x64 >NUL 2>NUL
+cl util.c -Drun_util && util.exe
+cl text.c -Drun_text && text.exe
+cl vecn.c -Drun_vecn && vecn.exe
+cl wqueue.c -Drun_wqueue && wqueue.exe

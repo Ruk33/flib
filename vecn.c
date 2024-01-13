@@ -154,7 +154,7 @@ void vdebug_(const char *name, int an, float *a)
 {
     fprintf(stderr, "%s -> (", name);
     for (int i = 0; i < an; i++, a++)
-        fprintf(stderr, "%f%s", *a, i + i == an ? "" : ", ");
+        fprintf(stderr, "%f%s", *a, i + 1 == an ? "" : ", ");
     fprintf(stderr, ")\n");
 }
 

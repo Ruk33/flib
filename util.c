@@ -20,11 +20,23 @@ typedef int64_t i64;
 (sizeof(x) / sizeof(*(x)))
 #define count_of countof
 
-#define countargs_(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) \
-N
-#define countargs(...) \
-countargs_(__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
-#define count_args countargs
+#define msvc_expand(...) __VA_ARGS__
+#define count_args_impl(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, n, ...) n
+#define count_args_1(...) count_args_impl(__VA_ARGS__)
+#define count_args_2(...) count_args_impl(__VA_ARGS__)
+#define count_args_3(...) count_args_impl(__VA_ARGS__)
+#define count_args_4(...) count_args_impl(__VA_ARGS__)
+#define count_args_5(...) count_args_impl(__VA_ARGS__)
+#define count_args_6(...) count_args_impl(__VA_ARGS__)
+#define count_args_7(...) count_args_impl(__VA_ARGS__)
+#define count_args_8(...) count_args_impl(__VA_ARGS__)
+#define count_args_9(...) count_args_impl(__VA_ARGS__)
+#define count_args_10(...) count_args_impl(__VA_ARGS__)
+#define count_args_chooser(...) \
+msvc_expand(count_args_impl(__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1))
+
+#define count_args(...) count_args_chooser(__VA_ARGS__)
+#define countargs(...) count_args_chooser(__VA_ARGS__)
 
 #ifndef abs
 #define abs(x) \

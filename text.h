@@ -1,3 +1,32 @@
+#include <stdarg.h>
+#include <stdio.h>
+
+// null terminated string.
+#define s ,2,
+// x characters from string.
+#define sn(x) ,3, (x),
+// int.
+#define d ,1,
+// float/double.
+#define f ,4,
+// unsigned int.
+#define u ,5,
+// character.
+#define c ,6,
+// pointer.
+#define p ,7,
+// long long.
+#define ll ,8,
+// size_t.
+#define z ,9,
+// unsigned long long.
+#define llu ,10,
+#define ull ,10,
+
+#define fprintf2(dest, ...) fprintf2_(dest __VA_ARGS__, 0)
+#define debug(...) fprintf2_(stderr __VA_ARGS__, 0)
+#define concat(dest, n, ...) concat_((dest), (n) __VA_ARGS__, 0)
+
 // count letters from src (utf8)
 size_t letters(char *src);
 // count bytes used by src including null terminator.
@@ -59,3 +88,17 @@ void trim(char *src);
 void substr(char *src, int n, size_t max);
 // repeat what times at the index n from src.
 void repeat(char *src, char *what, int n, size_t times);
+// scan src using fmt as pattern.
+// %s -> string
+// %d -> int
+int uriscan(char *src, char *fmt, ...);
+int uriscan_va(char *src, char *fmt, va_list va);
+// return number of printed bytes. if at some
+// point there is an error, the number of printed
+// bytes will be converted to negative.
+int fprintf2_(FILE *dest, ...);
+// print up to n bytes to dest.
+// the number of printed bytes is returned. if
+// at some point there is an error, the number of
+// printed bytes will be converted to negative.
+int concat_(char *dest, size_t n, ...);

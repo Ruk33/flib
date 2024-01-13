@@ -2,7 +2,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
-#include "text.h"
+#include <stdarg.h>
+#include "text.h" 
 
 size_t letters(char *src)
 {
@@ -354,12 +355,201 @@ void repeat(char *src, char *what, int n, size_t times)
         insert(at_n, what, 0);
 }
 
+int uriscan_va(char *src, char *fmt, va_list va)
+{
+    while (*src && *fmt) {
+        if (*fmt == '%' && *(fmt + 1) == 's') {
+            fmt++;
+            fmt++;
+            char *dest = va_arg(va, char *);
+            while (*src && *src != *fmt)
+                *dest++ = *src++;
+            continue;
+        }
+        if (*fmt == '%' && *(fmt + 1) == 'd') {
+            int *dest = va_arg(va, int *);
+            if (sscanf(src, "%d", dest) != 1)
+                break;
+            while (*src && *src >= '0' && *src <= '9') {
+                src++;
+            }
+            continue;
+        }
+        if (*src == *fmt) {
+            src++;
+            fmt++;
+            continue;
+        }
+        break;
+    }
+    return *src == 0 && *fmt == 0;
+}
+
+int uriscan(char *src, char *fmt, ...)
+{
+    va_list va;
+    va_start(va, fmt);
+    int r = uriscan_va(src, fmt, va);
+    va_end(va);
+    return r;
+}
+
+int vfprintf2(FILE *dest, va_list va)
+{
+    int r = 0;
+    while (1) {
+        int fmt = va_arg(va, int);
+        if (fmt == 0) 
+            break;
+        int tmp = 0;
+        switch (fmt) {
+            case 1: {
+                int src = va_arg(va, int);
+                tmp = fprintf(dest, "%d", src);
+            } break;
+            case 2: {
+                char *src = va_arg(va, char *);
+                tmp = fprintf(dest, "%s", src);
+            } break;
+            case 3: {
+                int n = va_arg(va, int);
+                char *src = va_arg(va, char *);
+                tmp = fprintf(dest, "%.*s", n, src);
+            } break;
+            case 4: {
+                double src = va_arg(va, double);
+                tmp = fprintf(dest, "%f", src);
+            } break;
+            case 5: {
+                unsigned int src = va_arg(va, unsigned int);
+                tmp = fprintf(dest, "%u", src);
+            } break;
+            case 6: {
+                char src = va_arg(va, char);
+                tmp = fprintf(dest, "%c", src);
+            } break;
+            case 7: {
+                void *src = va_arg(va, void *);
+                tmp = fprintf(dest, "%p", src);
+            } break;
+            case 8: {
+                long long src = va_arg(va, long long);
+                tmp = fprintf(dest, "%ll", src);
+            } break;
+            case 9: {
+                size_t src = va_arg(va, size_t);
+                tmp = fprintf(dest, "%z", src);
+            } break;
+            case 10: {
+                unsigned long long src = va_arg(va, unsigned long long);
+                tmp = fprintf(dest, "%llu", src);
+            } break;
+            default:
+            tmp = -1;
+            break;
+        }
+        if (tmp == -1) {
+            r = -r;
+            break;
+        }
+        r += tmp;
+    }
+    return r;
+}
+
+int fprintf2_(FILE *dest, ...)
+{
+    va_list va;
+    va_start(va, dest);
+    int r = vfprintf2(dest, va);
+    va_end(va);
+    return r;
+}
+
+int vconcat(char *dest, size_t n, va_list va)
+{
+    int r = 0;
+    for (size_t i = 0; i < n;) {
+        int fmt = va_arg(va, int);
+        if (fmt == 0) 
+            break;
+        size_t left = n - i;
+        int tmp = 0;
+        switch (fmt) {
+            case 1: {
+                int src = va_arg(va, int);
+                tmp = snprintf(dest, left, "%d", src);
+            } break;
+            case 2: {
+                char *src = va_arg(va, char *);
+                tmp = snprintf(dest, left, "%s", src);
+            } break;
+            case 3: {
+                int n = va_arg(va, int);
+                char *src = va_arg(va, char *);
+                tmp = snprintf(dest, left, "%.*s", n, src);
+            } break;
+            case 4: {
+                double src = va_arg(va, double);
+                tmp = snprintf(dest, left, "%f", src);
+            } break;
+            case 5: {
+                unsigned int src = va_arg(va, unsigned int);
+                tmp = snprintf(dest, left, "%u", src);
+            } break;
+            case 6: {
+                char src = va_arg(va, char);
+                tmp = snprintf(dest, left, "%c", src);
+            } break;
+            case 7: {
+                void *src = va_arg(va, void *);
+                tmp = snprintf(dest, left, "%p", src);
+            } break;
+            case 8: {
+                long long src = va_arg(va, long long);
+                tmp = snprintf(dest, left, "%ll", src);
+            } break;
+            case 9: {
+                size_t src = va_arg(va, size_t);
+                tmp = snprintf(dest, left, "%z", src);
+            } break;
+            case 10: {
+                unsigned long long src = va_arg(va, unsigned long long);
+                tmp = snprintf(dest, left, "%llu", src);
+            } break;
+            default:
+            tmp = -1;
+            break;
+        }
+        if (tmp == -1) {
+            r = -r;
+            break;
+        }
+        i += tmp;
+        dest += tmp;
+        r += tmp;
+    }
+    *dest = 0;
+    return r;
+}
+
+int concat_(char *dest, size_t n, ...)
+{
+    va_list va;
+    va_start(va, n);
+    int r = vconcat(dest, n, va);
+    va_end(va);
+    return r;
+}
+
 #ifdef run_text
 // example on how to use these functions
 int main()
 {
+    int tests = 0;
+    
 #define test(x) \
-(assert((x) && "failed " #x), fprintf(stderr, "passed - %s\n", #x))
+(assert((x) && "failed " #x), fprintf(stderr, "passed - %s\n", #x), tests++)
     
     fprintf(stderr, "\n\nrunning tests from text.c\n\n");
     
@@ -372,83 +562,85 @@ int main()
     test(begins_with(from(buf, -4), "amet"));
     
 #if 1
-    test(letters("x•¹·êŒ˜") == 2);
+    test(letters("ä¸–ç•Œ") == 2);
 #endif
     
 #if 1
-    test(bytes("x•¹·êŒ˜") == sizeof("x•¹·êŒ˜"));
+    test(bytes("ä¸–ç•Œ") == sizeof("ä¸–ç•Œ"));
 #endif
     
 #if 1
     test(!contains(buf, "franco"));
     insert(buf, "franco ", find_index(buf, "ipsum"));
-    // fprintf(stderr, "inserted '%s'\n", buf);
 #endif
     
 #if 1
     test(contains(buf, "franco "));
     erase(buf, "franco ");
-    // fprintf(stderr, "erased franco from '%s'\n", buf);
     test(!contains(buf, "franco "));
 #endif
     
 #if 1
     test(!contains(buf, "foo"));
     replace(buf, "ipsum", "foo");
-    // fprintf(stderr, "replace ipsum with foo '%s'\n", buf);
     test(!contains(buf, "ipsum"));
     test(contains(buf, "foo"));
 #endif
     
 #if 1
     append(buf, " this is a new ending");
-    // fprintf(stderr, "adding new ending '%s'\n", buf);
     test(ends_with(buf, " this is a new ending"));
 #endif
     
 #if 1
     prepend(buf, "this is a new beginning ");
-    // fprintf(stderr, "adding new beginning '%s'\n", buf);
     test(begins_with(buf, "this is a new beginning "));
 #endif
     
 #if 1
     prepend(buf, "        ");
     append(buf, "  ");
-    // fprintf(stderr, "adding spaces '%s'\n", buf);
     trim(buf);
-    // fprintf(stderr, "trimming spaces '%s'\n", buf);
     test(!begins_with(buf, " "));
     test(!ends_with(buf, " "));
 #endif
     
 #if 1
     substr(buf, 0, 4);
-    // fprintf(stderr, "new substr '%s'\n", buf);
     test(letters(buf) == 4);
     test(begins_with(buf, "this"));
 #endif
     
 #if 1
     // utf8
-    prepend(buf, "x•¹·êŒ˜");
-    // fprintf(stderr, "%s\n", buf);
+    prepend(buf, "ä¸–ç•Œ");
     
     char *next_letter = 0;
     unsigned int utf8_letter = letter(buf, &next_letter);
     // 4 from next letter + 1 for null terminator.
     char printable_utf8_letter[5] = {0};
     memcpy(printable_utf8_letter, &utf8_letter, 4);
-    // fprintf(stderr, "letter %s\n", printable_utf8_letter);
 #endif
     
 #if 1
     repeat(buf, "repeatme", 0, 3);
     test(begins_with(buf, "repeatmerepeatmerepeatme"));
-    // fprintf(stderr, "repeat '%s'\n", buf);
 #endif
     
-    fprintf(stderr, "all good!\n");
+    char name[] = "franco";
+    int answer = 42;
+    debug(s "this is an experimental way of printing a message. "
+          s "there were " d tests s " completed tests! "
+          s "you " s name s " may be wondering how this is all possible? "
+          s "well, the answer is " d answer s "\n");
+    
+#if 1
+    char dest[32] = {0};
+    int printed = concat(dest, sizeof(dest), s "this " s name s " is also great. but then again " d answer);
+    debug(s "dest is -> '" s dest s "' and " d printed s " bytes were printed\n");
+#endif
+    
+    debug(s "all good!\n");
     
     return 0;
 }
