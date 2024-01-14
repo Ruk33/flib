@@ -6,31 +6,37 @@ static unsigned long wqueue_thread(void *p)
     struct wqueue *q = (struct wqueue *) p;
     while (1) {
         int close = 0;
-        EnterCriticalSection(&q->lock);
-        close = q->closed && !q->wcount;
-        LeaveCriticalSection(&q->lock);
+        WaitForSingleObject(q->lock, INFINITE);
+        close = q->closed;
+        ReleaseMutex(q->lock);
         if (close)
             break;
 
+        // wait for more work.
         WaitForSingleObject(q->wpending, INFINITE);
-        EnterCriticalSection(&q->lock);
-        void *work = q->work[--q->wcount];
-        LeaveCriticalSection(&q->lock);
+
+        WaitForSingleObject(q->lock, INFINITE);
+        void *work = q->work[0];
+        for (size_t i = 1; i < q->wcount; i++)
+            q->work[i - 1] = q->work[i];
+        q->wcount--;
+
+        ReleaseMutex(q->lock);
         q->worker((void *) q, work);
     }
 
     CloseHandle(q->wpending);
     CloseHandle(q->thread);
-    DeleteCriticalSection(&q->lock);
+    CloseHandle(q->lock);
 
     return 0;
 }
 
 void wstart(struct wqueue *q, worker *worker)
 {
-    InitializeCriticalSection(&q->lock);
     q->closed = 0;
     q->worker = worker;
+    q->lock = CreateMutex(0, FALSE, 0);
     q->wpending = CreateEvent(0, FALSE, FALSE, 0);
     q->thread = CreateThread(0, 0, wqueue_thread, q, 0, 0);
 }
@@ -39,9 +45,9 @@ void wpush(struct wqueue *q, void *work)
 {
     if (q->closed)
         return;
-    EnterCriticalSection(&q->lock);
+    WaitForSingleObject(q->lock, INFINITE);
     q->work[q->wcount++] = work;
-    LeaveCriticalSection(&q->lock);
+    ReleaseMutex(q->lock);
     SetEvent(q->wpending);
 }
 
@@ -49,9 +55,9 @@ void wclose(struct wqueue *q)
 {
     if (q->closed)
         return;
-    EnterCriticalSection(&q->lock);
+    WaitForSingleObject(q->lock, INFINITE);
     q->closed = 1;
-    LeaveCriticalSection(&q->lock);
+    ReleaseMutex(q->lock);
 }
 
 #ifdef run_wqueue
